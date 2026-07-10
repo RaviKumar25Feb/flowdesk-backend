@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const indexRoutes = require("./routes/index.routes");
+const testRoutes = require("./routes/test.routes");
+const authRoutes = require("./routes/auth.routes.js");
 const app = express();
 
 // Middlewares
@@ -11,7 +12,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Routes
-app.use("/api", indexRoutes);
+app.use("/api", testRoutes);
+app.use("/api/auth", authRoutes);
 
 // 404 Handler
 app.use((req, res) => {
