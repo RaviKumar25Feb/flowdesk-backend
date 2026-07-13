@@ -1,25 +1,54 @@
 const express = require("express");
 const router = express.Router();
 
-const auth = require("../middlewares/auth.middleware");
-const validate = require("../middlewares/validation.middleware");
+//import req data validation
+const {
+  sendOTPValidation,
+  signupValidation,
+  loginValidation,
+  changePasswordValidation,
+  createTokenValidation,
+  resetPasswordValidation,
+} = require("../validations/auth.validation");
 
+//import error validation middleware
+const { validate } = require("../middlewares/validation.middleware");
+
+//import authentication middleware
+const { auth } = require("../middlewares/auth.middleware");
+
+//import authorization middleware
+const { authorize } = require("../middlewares/role.middleware");
+
+//import authentication controllers
 const {
   sendOTP,
   signup,
   login,
   logout,
+  changePassword,
+  createToken,
+  resetPassword,
 } = require("../controllers/auth.controller");
 
-const {
-  sendOTPValidation,
-  registerValidation,
-  loginValidation,
-} = require("../validations/auth.validation");
-
+//mapping authentication controllers
 router.post("/send-otp", sendOTPValidation, validate, sendOTP);
-router.post("/signup", registerValidation, validate, signup);
+router.post("/signup", signupValidation, validate, signup);
 router.post("/login", loginValidation, validate, login);
 router.post("/logout", auth, logout);
+router.post("/forgot-password", createTokenValidation, validate, createToken);
+router.post(
+  "/reset-password",
+  resetPasswordValidation,
+  validate,
+  resetPassword,
+);
+router.put(
+  "/change-password",
+  auth,
+  changePasswordValidation,
+  validate,
+  changePassword,
+);
 
 module.exports = router;

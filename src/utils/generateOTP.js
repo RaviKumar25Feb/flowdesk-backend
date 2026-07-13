@@ -1,7 +1,7 @@
 const otpGenerator = require("otp-generator");
 const OTP = require("../models/otp.model");
 
-const generateOTP = async () => {
+exports.generateOTP = async () => {
   let otp;
   let existingOTP = true;
 
@@ -17,5 +17,3 @@ const generateOTP = async () => {
 
   return otp;
 };
-
-module.exports = generateOTP;
