@@ -5,6 +5,9 @@ const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./routes/auth.routes.js");
 const profileRoutes = require("./routes/profile.routes");
+const projectRoutes = require("./routes/project.routes");
+const teamRoutes = require("./routes/team.routes");
+
 
 // Middlewares
 app.use(cors());
@@ -15,6 +18,8 @@ app.use(cookieParser());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/team", teamRoutes);
 
 // 404 Handler
 app.use((req, res) => {

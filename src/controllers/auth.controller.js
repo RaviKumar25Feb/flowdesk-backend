@@ -158,6 +158,13 @@ exports.login = async (req, res) => {
     // Check User
     const user = await User.findOne({ email }).populate("profile");
 
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Account is inactive",
+      });
+    }
+
     if (!user) {
       return res.status(404).json({
         success: false,

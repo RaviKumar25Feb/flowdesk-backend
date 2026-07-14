@@ -31,6 +31,13 @@ const {
   resetPassword,
 } = require("../controllers/auth.controller");
 
+/**
+  TODO:
+  This controller will be moved to User Management module.
+  Public signup will be removed.
+  Manager will create Developer/Client accounts.
+**/
+
 //mapping authentication controllers
 router.post("/send-otp", sendOTPValidation, validate, sendOTP);
 router.post("/signup", signupValidation, validate, signup);
