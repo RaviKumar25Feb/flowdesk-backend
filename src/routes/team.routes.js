@@ -5,7 +5,6 @@ const { ROLES } = require("../constants/roles");
 
 const { auth } = require("../middlewares/auth.middleware");
 const { authorize } = require("../middlewares/role.middleware");
-
 const { validate } = require("../middlewares/validation.middleware");
 
 const {

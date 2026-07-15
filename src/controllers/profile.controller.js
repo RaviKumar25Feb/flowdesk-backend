@@ -2,9 +2,6 @@ const User = require("../models/user.model");
 const Profile = require("../models/profile.model");
 const { uploadToCloudinary } = require("../utils/uploadToCloudinary");
 const { cloudinary } = require("../config/cloudinary.config");
-const { accountDeleted } = require("../mails/accountDeleted");
-const bcrypt = require("bcrypt");
-const {mailSender} = require("../utils/mailSender");
 
 //get user profile details
 exports.getProfile = async (req, res) => {
@@ -187,82 +184,6 @@ exports.updateAvatar = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
-    });
-  }
-};
-
-//delete user profile
-exports.deleteProfile = async (req, res) => {
-  try {
-    const { password } = req.body;
-
-    // Get Logged In User
-    const user = await User.findById(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    const email = user.email;
-    const name = user.name;
-
-    const isPasswordMatched = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordMatched) {
-      return res.status(400).json({
-        success: false,
-        message: "Incorrect password",
-      });
-    }
-
-    //agar cloudinary par logo ho vo bhi delete kardo
-    const profile = await Profile.findById(user.profile);
-    if (!profile) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found",
-      });
-    }
-
-    if (profile.avatarPublicId) {
-      try {
-        await cloudinary.uploader.destroy(profile.avatarPublicId);
-      } catch (err) {
-        console.log("Failed to delete old avatar:", err.message);
-      }
-    }
-
-    // Delete Profile
-    await Profile.findByIdAndDelete(user.profile);
-    // Delete User
-    await User.findByIdAndDelete(req.user.id);
-
-    try {
-      await mailSender(
-        email,
-        "Your FlowDesk Account Has Been Deleted",
-        accountDeleted(name),
-      );
-    } catch (error) {
-      console.log("Failed to send account deletion email:", error.message);
-    }
-
-    // Logout User
-    res.clearCookie("token");
-
-    return res.status(200).json({
-      success: true,
-      message: "Profile deleted successfully",
-    });
-  } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
     });
   }
 };

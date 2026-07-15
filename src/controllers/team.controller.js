@@ -120,7 +120,7 @@ exports.removeDeveloper = async (req, res) => {
     const isAssigned = project.developers.some(
       (id) => id.toString() === developerId,
     );
-    
+
     if (!isAssigned) {
       return res.status(404).json({
         success: false,

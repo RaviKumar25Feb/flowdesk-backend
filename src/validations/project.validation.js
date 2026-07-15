@@ -2,7 +2,7 @@ const { body } = require("express-validator");
 const { PROJECT_PRIORITY } = require("../constants/project.constants");
 const { PROJECT_STATUS } = require("../constants/project.constants");
 
-const createProjectValidation = [
+exports.createProjectValidation = [
   body("name")
     .trim()
     .notEmpty()
@@ -46,7 +46,7 @@ const createProjectValidation = [
     }),
 ];
 
-const updateProjectValidation = [
+exports.updateProjectValidation = [
   body("name").optional().trim().notEmpty(),
 
   body("description").optional().trim().notEmpty(),
@@ -59,8 +59,3 @@ const updateProjectValidation = [
 
   body("deadline").optional().isISO8601(),
 ];
-
-module.exports = {
-  createProjectValidation,
-  updateProjectValidation,
-};

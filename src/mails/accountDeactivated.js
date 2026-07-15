@@ -1,11 +1,11 @@
-exports.accountDeleted = (name) => {
+exports.accountDeactivatedTemplate = (name) => {
   return `
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <title>Account Deleted</title>
+    <title>Account Deactivated</title>
 </head>
 
 <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
@@ -31,19 +31,19 @@ Hello ${name},
 </h2>
 
 <p style="color:#555;font-size:16px;line-height:1.7;">
-Your <strong>FlowDesk</strong> account has been permanently deleted.
+Your <strong>FlowDesk</strong> account has been <strong>deactivated</strong> by your organization administrator.
 </p>
 
 <p style="color:#555;font-size:16px;line-height:1.7;">
-All associated profile information has been removed from our system.
+You will no longer be able to sign in to your FlowDesk account while it remains deactivated.
 </p>
 
 <p style="color:#555;font-size:16px;line-height:1.7;">
-If you performed this action, no further action is required.
+Your account information and work history have been securely retained by your organization.
 </p>
 
 <p style="color:#d32f2f;font-size:16px;line-height:1.7;">
-If you did <strong>NOT</strong> request this deletion, please contact our support team immediately.
+If you believe this action was taken in error, please contact your manager or administrator for assistance.
 </p>
 
 <hr style="margin:30px 0;border:none;border-top:1px solid #ddd;">

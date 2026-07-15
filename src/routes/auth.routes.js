@@ -3,8 +3,6 @@ const router = express.Router();
 
 //import req data validation
 const {
-  sendOTPValidation,
-  signupValidation,
   loginValidation,
   changePasswordValidation,
   createTokenValidation,
@@ -22,8 +20,6 @@ const { authorize } = require("../middlewares/role.middleware");
 
 //import authentication controllers
 const {
-  sendOTP,
-  signup,
   login,
   logout,
   changePassword,
@@ -31,31 +27,27 @@ const {
   resetPassword,
 } = require("../controllers/auth.controller");
 
-/**
-  TODO:
-  This controller will be moved to User Management module.
-  Public signup will be removed.
-  Manager will create Developer/Client accounts.
-**/
-
 //mapping authentication controllers
-router.post("/send-otp", sendOTPValidation, validate, sendOTP);
-router.post("/signup", signupValidation, validate, signup);
 router.post("/login", loginValidation, validate, login);
 router.post("/logout", auth, logout);
-router.post("/forgot-password", createTokenValidation, validate, createToken);
-router.post(
-  "/reset-password",
-  resetPasswordValidation,
-  validate,
-  resetPassword,
-);
 router.put(
   "/change-password",
   auth,
   changePasswordValidation,
   validate,
   changePassword,
+);
+router.post(
+  "/reset-password-token",
+  createTokenValidation,
+  validate,
+  createToken,
+);
+router.post(
+  "/reset-password",
+  resetPasswordValidation,
+  validate,
+  resetPassword,
 );
 
 module.exports = router;

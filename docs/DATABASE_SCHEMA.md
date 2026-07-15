@@ -1,105 +1,246 @@
 # Database Schema
 
-This document contains the database design for the FlowDesk Backend.
+This document describes the MongoDB database design used in the FlowDesk Backend.
 
 ---
 
-## Database
+# Database
 
-MongoDB
+**MongoDB**
 
 ---
 
-## Collections
+# Collections
 
 - Users
+- Profiles
 - Projects
 - Tasks
-- Comments
+
+> **Note:** The OTP collection has been removed because public signup is not supported. Manager creates all Developer and Client accounts directly.
 
 ---
 
-## Relationships
+# Entity Relationship
 
-```
-User
-│
-├── Manager
-├── Developer
-└── Client
-
-Manager
-│
-└── Creates
-      │
-      ▼
-   Project
-      │
-      ├── Developers
-      ├── Client
-      └── Tasks
-                │
-                ▼
-             Comment
+```text
+                    Manager (User)
+                          │
+                          │ Creates
+                          ▼
+                     Developer (User)
+                          │
+                          └────────────┐
+                                       │
+                    Client (User)      │
+                         ▲             │
+                         │             │
+                         └──── Project ◄──────────────┐
+                               │                      │
+                               │                      │
+                     Developers[]                     │
+                               │                      │
+                               ▼                      │
+                             Task ────────────────────┘
+                               │
+                               ▼
+                         Assigned Developer
 ```
 
 ---
 
-## Planned Schemas
+# Collection Overview
 
-### User
+## Users
 
-```
+Stores authentication and role information.
+
+```text
 name
 email
 password
 role
-avatar
-timestamps
+profile (ObjectId -> Profile)
+resetPasswordToken
+resetPasswordExpires
+isActive
+createdAt
+updatedAt
+```
+
+### Roles
+
+```text
+MANAGER
+DEVELOPER
+CLIENT
 ```
 
 ---
 
-### Project
+## Profiles
 
+Stores personal information of every user.
+
+```text
+user (ObjectId -> User)
+
+avatar
+avatarPublicId
+
+phone
+bio
+
+dateOfBirth
+gender
+
+address
+city
+state
+country
+pincode
+
+github
+linkedin
+portfolio
+
+designation
+department
+
+skills[]
+
+createdAt
+updatedAt
 ```
-title
+
+---
+
+## Projects
+
+Stores project information managed by the Manager.
+
+```text
+name
 description
-manager
-client
+
+manager (ObjectId -> User)
+
+client (ObjectId -> User)
+
 developers[]
+
 status
+priority
+
 startDate
 deadline
-timestamps
+
+completedAt
+
+isArchived
+
+createdAt
+updatedAt
+```
+
+### Relationships
+
+```text
+One Manager
+        │
+        └── Many Projects
+
+One Client
+        │
+        └── Many Projects
+
+One Project
+        │
+        └── Many Developers
 ```
 
 ---
 
-### Task
+## Tasks
 
-```
+Stores project tasks assigned to Developers.
+
+```text
 title
 description
-project
-assignedTo
+
+project (ObjectId -> Project)
+
+assignedTo (ObjectId -> User)
+
+createdBy (ObjectId -> User)
+
 priority
 status
-deadline
-timestamps
+
+startDate
+dueDate
+
+estimatedHours
+actualHours
+
+completedAt
+
+createdAt
+updatedAt
+```
+
+### Relationships
+
+```text
+One Project
+      │
+      └── Many Tasks
+
+One Developer
+      │
+      └── Many Tasks
 ```
 
 ---
 
-### Comment
+# Collection Relationships
 
-```
-task
-user
-message
-timestamps
+```text
+User
+ │
+ ├── One Profile
+ │
+ ├── Can Manage Many Projects (Manager)
+ │
+ ├── Can Own Many Projects (Client)
+ │
+ └── Can Be Assigned Many Tasks (Developer)
+
+Project
+ │
+ ├── One Manager
+ ├── One Client
+ ├── Many Developers
+ └── Many Tasks
+
+Task
+ │
+ ├── One Project
+ ├── One Assigned Developer
+ └── One Created By (Manager)
 ```
 
 ---
 
-Detailed schema definitions will be added during implementation.
+# Current Database Status
+
+| Collection    | Status         |
+| ------------- | -------------- |
+| Users         | ✅ Implemented |
+| Profiles      | ✅ Implemented |
+| Projects      | ✅ Implemented |
+| Tasks         | ✅ Implemented |
+| Comments      | ⏳ Planned     |
+| Notifications | ⏳ Planned     |
+| Activity Logs | ⏳ Planned     |

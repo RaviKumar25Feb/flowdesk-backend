@@ -52,13 +52,3 @@ exports.updateProfileValidation = [
 
   body("skills").optional().isArray().withMessage("Skills must be an array"),
 ];
-
-exports.deleteProfileValidation = [
-  body("password").notEmpty().withMessage("Password is required"),
-
-  body("confirmText")
-    .notEmpty()
-    .withMessage("Confirmation text is required")
-    .equals("DELETE MY ACCOUNT")
-    .withMessage('Please type "DELETE MY ACCOUNT" to confirm account deletion'),
-];

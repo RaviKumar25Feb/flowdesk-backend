@@ -1,161 +1,188 @@
 # FlowDesk Backend API Documentation
 
-> Version: v1 (Current Progress) Last Updated: 14 July 2026
+> **Version:** v1.0 MVP
+> **Last Updated:** 16 July 2026
 
-## Base URL
+---
 
-``` text
+# Base URL
+
+```text
 /api
 ```
 
-## Authentication
+---
 
-  -----------------------------------------------------------------------------------
-  Method            Endpoint                      Access            Description
-  ----------------- ----------------------------- ----------------- -----------------
-  POST              `/api/auth/send-otp`          Public            Send OTP
+# Authentication
 
-  POST              `/api/auth/signup`            Manager           Create Developer
-                                                                    / Client
+| Method | Endpoint                    | Access        | Description     |
+| ------ | --------------------------- | ------------- | --------------- |
+| POST   | `/api/auth/login`           | Public        | Login           |
+| POST   | `/api/auth/logout`          | Authenticated | Logout          |
+| POST   | `/api/auth/forgot-password` | Public        | Forgot Password |
+| POST   | `/api/auth/reset-password`  | Public        | Reset Password  |
+| PATCH  | `/api/auth/change-password` | Authenticated | Change Password |
 
-  POST              `/api/auth/login`             Public            Login
+> **Note**
+>
+> Public Signup and OTP verification are **not supported**.
+>
+> All Developer and Client accounts are created only by the Manager.
 
-  POST              `/api/auth/logout`            Authenticated     Logout
+---
 
-  POST              `/api/auth/forgot-password`   Public            Forgot Password
+# Users
 
-  POST              `/api/auth/reset-password`    Public            Reset Password
+| Method | Endpoint             | Access  | Description                   |
+| ------ | -------------------- | ------- | ----------------------------- |
+| POST   | `/api/users`         | Manager | Create Developer / Client     |
+| GET    | `/api/users`         | Manager | Get All Users                 |
+| GET    | `/api/users/:userId` | Manager | Get User Details              |
+| PUT    | `/api/users/:userId` | Manager | Update User                   |
+| DELETE | `/api/users/:userId` | Manager | Deactivate User (Soft Delete) |
 
-  PATCH             `/api/auth/change-password`   Authenticated     Change Password
-  -----------------------------------------------------------------------------------
+### Business Rules
 
-## Profile
+- Only Manager can manage users.
+- Only Developer and Client accounts can be created.
+- Random password is generated automatically.
+- Login credentials are sent via email.
+- User can change password after login.
+- DELETE only deactivates the account (`isActive = false`).
 
-  Method   Endpoint                Access          Description
-  -------- ----------------------- --------------- ----------------
-  GET      `/api/profile`          Authenticated   Get Profile
-  PUT      `/api/profile`          Authenticated   Update Profile
-  PATCH    `/api/profile/avatar`   Authenticated   Update Avatar
-  DELETE   `/api/profile`          Authenticated   Delete Account
+---
 
-## Projects
+# Profile
 
-  Method   Endpoint              Access    Description
-  -------- --------------------- --------- ---------------------
-  POST     `/api/projects`       Manager   Create Project
-  GET      `/api/projects`       Manager   Get All Projects
-  GET      `/api/projects/:id`   Manager   Get Project Details
-  PUT      `/api/projects/:id`   Manager   Update Project
-  DELETE   `/api/projects/:id`   Manager   Soft Delete Project
+| Method | Endpoint              | Access        | Description     |
+| ------ | --------------------- | ------------- | --------------- |
+| GET    | `/api/profile`        | Authenticated | Get Own Profile |
+| PUT    | `/api/profile`        | Authenticated | Update Profile  |
+| PATCH  | `/api/profile/avatar` | Authenticated | Update Avatar   |
 
-### POST /api/projects
+### Business Rules
 
-**Access:** Manager
+- Every User has one Profile.
+- Profile cannot be deleted.
+- Account deactivation is handled by the Manager.
 
-#### Request
+---
 
-``` json
-{
-  "name": "FlowDesk CRM",
-  "description": "CRM Development",
-  "client": "<clientId>",
-  "priority": "HIGH",
-  "startDate": "2026-07-20",
-  "deadline": "2026-09-30"
-}
-```
+# Projects
 
-#### Success Response
+| Method | Endpoint                   | Access  | Description         |
+| ------ | -------------------------- | ------- | ------------------- |
+| POST   | `/api/projects`            | Manager | Create Project      |
+| GET    | `/api/projects`            | Manager | Get All Projects    |
+| GET    | `/api/projects/:projectId` | Manager | Get Project Details |
+| PUT    | `/api/projects/:projectId` | Manager | Update Project      |
+| DELETE | `/api/projects/:projectId` | Manager | Archive Project     |
 
-``` json
-{
-  "success": true,
-  "message": "Project created successfully.",
-  "data": {}
-}
-```
+### Business Rules
 
-#### Business Rules
+- Only Manager can create projects.
+- Manager is taken from authenticated user.
+- One Client can have multiple projects.
+- Duplicate project names are not allowed for the same client.
+- Deadline must be greater than Start Date.
 
--   Only Manager can create projects.
--   Manager is taken from authenticated user.
--   One client can have multiple projects.
--   Duplicate project names are not allowed for the same client.
--   Deadline must be after Start Date.
+---
 
-## Team
+# Team
 
-  ------------------------------------------------------------------------------------------------------
-  Method            Endpoint                                         Access            Description
-  ----------------- ------------------------------------------------ ----------------- -----------------
-  PATCH             `/api/team/assign`                               Manager           Assign Developers
+| Method | Endpoint                                       | Access  | Description             |
+| ------ | ---------------------------------------------- | ------- | ----------------------- |
+| PATCH  | `/api/team/assign`                             | Manager | Assign Developers       |
+| GET    | `/api/team/:projectId/developers`              | Manager | Get Assigned Developers |
+| DELETE | `/api/team/:projectId/developers/:developerId` | Manager | Remove Developer        |
 
-  GET               `/api/team/:projectId/developers`                Manager           Get Assigned
-                                                                                       Developers
+### Business Rules
 
-  DELETE            `/api/team/:projectId/developers/:developerId`   Manager           Remove Developer
-  ------------------------------------------------------------------------------------------------------
+- Project must belong to logged-in Manager.
+- Only Developers can be assigned.
+- Duplicate assignments are ignored.
 
-### PATCH /api/team/assign
+---
 
-#### Request
+# Tasks
 
-``` json
-{
-  "projectId": "<projectId>",
-  "developers": [
-    "<developerId1>",
-    "<developerId2>"
-  ]
-}
-```
+| Method | Endpoint                        | Access                       | Description        |
+| ------ | ------------------------------- | ---------------------------- | ------------------ |
+| POST   | `/api/tasks`                    | Manager                      | Create Task        |
+| GET    | `/api/tasks/project/:projectId` | Manager                      | Get Project Tasks  |
+| GET    | `/api/tasks/:taskId`            | Manager + Assigned Developer | Get Task Details   |
+| PUT    | `/api/tasks/:taskId`            | Manager                      | Update Task        |
+| DELETE | `/api/tasks/:taskId`            | Manager                      | Delete Task        |
+| PATCH  | `/api/tasks/:taskId/status`     | Assigned Developer           | Update Task Status |
+| GET    | `/api/tasks/my-tasks`           | Developer                    | Get Assigned Tasks |
 
-#### Success Response
+### Business Rules
 
-``` json
-{
-  "success": true,
-  "message": "Developers assigned successfully.",
-  "data": {}
-}
-```
+- Task belongs to one Project.
+- Task is assigned to one Developer.
+- One Developer can have multiple Tasks.
+- Developer can update only the status of assigned tasks.
+- Manager has full control over task management.
 
-#### Business Rules
+---
 
--   Project must exist.
--   Project must belong to logged-in Manager.
--   Users must have DEVELOPER role.
--   Duplicate assignments are ignored using `$addToSet`.
+# Current Business Workflow
 
-### GET /api/team/:projectId/developers
-
-Returns all developers assigned to a project.
-
-### DELETE /api/team/:projectId/developers/:developerId
-
-Removes a developer from the project team.
-
-## Current Workflow
-
-``` text
-Manager Login
-    ↓
+```text
+Manager (Pre-created)
+        │
+        ▼
+Login
+        │
+        ▼
 Create Client
-    ↓
+        │
+        ▼
 Create Developer
-    ↓
+        │
+        ▼
+Automatic Password Generation
+        │
+        ▼
+Credentials Sent via Email
+        │
+        ▼
+Developer / Client Login
+        │
+        ▼
+Update Profile
+        │
+        ▼
 Create Project
-    ↓
+        │
+        ▼
 Assign Developers
-    ↓
-Create Tasks (Next Module)
+        │
+        ▼
+Create Tasks
+        │
+        ▼
+Developer Updates Task Status
 ```
 
-## Next Module
+---
 
--   Tasks
--   Comments
--   Documents
--   Dashboard
--   Notifications (Future)
--   Activity Logs (Future)
+# Modules Completed
+
+- ✅ Authentication
+- ✅ User Management
+- ✅ Profile Management
+- ✅ Project Management
+- ✅ Team Management
+- ✅ Task Management
+
+---
+
+# Upcoming Modules
+
+- Dashboard
+- Comments
+- Activity Logs
+- Notifications
+- File/Documents
+- Reports & Analytics
