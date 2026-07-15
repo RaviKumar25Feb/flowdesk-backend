@@ -18,12 +18,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // routes mounting
-app.use("/api/auth", authRoutes);
-app.use("/api/profile", profileRoutes);
-app.use("/api/projects", projectRoutes);
-app.use("/api/team", teamRoutes);
-app.use("/api/tasks", taskRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/profile", profileRoutes);
+app.use("/api/v1/projects", projectRoutes);
+app.use("/api/v1/team", teamRoutes);
+app.use("/api/v1/tasks", taskRoutes);
+app.use("/api/v1/users", userRoutes);
 
 // 404 Handler
 app.use((req, res) => {
