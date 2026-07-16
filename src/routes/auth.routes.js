@@ -18,6 +18,14 @@ const { auth } = require("../middlewares/auth.middleware");
 //import authorization middleware
 const { authorize } = require("../middlewares/role.middleware");
 
+//import ratelimiting middleware
+const {
+  loginLimiter,
+  forgotPasswordLimiter,
+  resetPasswordLimiter,
+  changePasswordLimiter,
+} = require("../middlewares/rateLimiter.middleware");
+
 //import authentication controllers
 const {
   login,
@@ -28,23 +36,26 @@ const {
 } = require("../controllers/auth.controller");
 
 //mapping authentication controllers
-router.post("/login", loginValidation, validate, login);
+router.post("/login", loginLimiter, loginValidation, validate, login);
 router.post("/logout", auth, logout);
 router.put(
   "/change-password",
+  changePasswordLimiter,
   auth,
   changePasswordValidation,
   validate,
   changePassword,
 );
 router.post(
-  "/reset-password-token",
+  "/forgot-password",
+  forgotPasswordLimiter,
   createTokenValidation,
   validate,
   createToken,
 );
 router.post(
   "/reset-password",
+  resetPasswordLimiter,
   resetPasswordValidation,
   validate,
   resetPassword,

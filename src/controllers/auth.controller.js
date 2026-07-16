@@ -144,7 +144,7 @@ exports.changePassword = async (req, res) => {
       await mailSender(
         updatedDetails.email,
         "Password Changed Successfully",
-        passwordChanged(updatedDetails.name),
+        passwordChanged(updatedDetails.name, updatedDetails.email),
       );
     } catch (error) {
       console.log(error.message);
