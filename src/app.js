@@ -10,6 +10,9 @@ const projectRoutes = require("./routes/project.routes");
 const teamRoutes = require("./routes/team.routes");
 const taskRoutes = require("./routes/task.routes");
 const userRoutes = require("./routes/user.routes");
+const taskComment = require("./routes/taskComment.routes.js")
+const projectDiscussionRoutes = require("./routes/projectDiscussion.routes");
+
 
 // Middlewares
 app.use(cors());
@@ -24,6 +27,8 @@ app.use("/api/v1/projects", projectRoutes);
 app.use("/api/v1/team", teamRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/taskComment", taskComment);
+app.use("/api/v1/projectDiscussion", projectDiscussionRoutes)
 
 // 404 Handler
 app.use((req, res) => {
