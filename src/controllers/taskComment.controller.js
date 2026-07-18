@@ -29,7 +29,7 @@ exports.createTaskComment = async (req, res) => {
       const project = await Project.findOne({
         _id: task.project,
         manager: req.user.id,
-        isDeleted: false,
+        isArchived: false,
       });
 
       if (!project) {
@@ -104,7 +104,7 @@ exports.getTaskComments = async (req, res) => {
       const project = await Project.findOne({
         _id: task.project,
         manager: req.user.id,
-        isDeleted: false,
+        isArchived: false,
       });
 
       if (!project) {
@@ -179,7 +179,7 @@ exports.updateTaskComment = async (req, res) => {
       const project = await Project.findOne({
         _id: task.project,
         manager: req.user.id,
-        isDeleted: false,
+        isArchived: false,
       });
 
       if (!project) {
@@ -250,7 +250,7 @@ exports.deleteTaskComment = async (req, res) => {
       const project = await Project.findOne({
         _id: task.project,
         manager: req.user.id,
-        isDeleted: false,
+        isArchived: false,
       });
 
       if (!project) {

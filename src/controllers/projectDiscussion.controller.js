@@ -10,7 +10,7 @@ exports.createProjectDiscussion = async (req, res) => {
     // Check Project
     const project = await Project.findOne({
       _id: projectId,
-      isDeleted: false,
+      isArchived: false,
     });
 
     if (!project) {
@@ -79,7 +79,7 @@ exports.getProjectDiscussions = async (req, res) => {
     // Check Project
     const project = await Project.findOne({
       _id: projectId,
-      isDeleted: false,
+      isArchived: false,
     });
 
     if (!project) {
@@ -212,7 +212,7 @@ exports.deleteProjectDiscussion = async (req, res) => {
       const project = await Project.findOne({
         _id: discussion.project,
         manager: req.user.id,
-        isDeleted: false,
+        isArchived: false,
       });
 
       if (!project) {
