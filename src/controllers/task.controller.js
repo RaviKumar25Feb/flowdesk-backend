@@ -95,122 +95,6 @@ exports.createTask = async (req, res) => {
   }
 };
 
-exports.getProjectTasks = async (req, res) => {
-  try {
-    const managerId = req.user.id;
-    const { projectId } = req.params;
-
-    // Check Project
-    const projectDetails = await Project.findById(projectId);
-
-    if (!projectDetails) {
-      return res.status(404).json({
-        success: false,
-        message: "Project not found.",
-      });
-    }
-
-    // Check Archived
-    if (projectDetails.isArchived) {
-      return res.status(400).json({
-        success: false,
-        message: "Project is archived.",
-      });
-    }
-
-    // Check Ownership
-    if (projectDetails.manager.toString() !== managerId) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to access this project.",
-      });
-    }
-
-    // Get Tasks
-    const tasks = await Task.find({
-      project: projectId,
-      isDeleted: false,
-    })
-      .populate("assignedTo", "name email")
-      .populate("createdBy", "name email")
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json({
-      success: true,
-      count: tasks.length,
-      data: tasks,
-    });
-  } catch (error) {
-    console.error("Get Project Tasks Error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error.",
-    });
-  }
-};
-
-exports.getTaskById = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const userRole = req.user.role;
-    const { taskId } = req.params;
-
-    // Find Task
-    const task = await Task.findById(taskId)
-      .populate("project")
-      .populate("assignedTo", "name email")
-      .populate("createdBy", "name email");
-
-    if (!task) {
-      return res.status(404).json({
-        success: false,
-        message: "Task not found.",
-      });
-    }
-
-    // Check Soft Delete
-    if (task.isDeleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Task not found.",
-      });
-    }
-
-    // Manager Access
-    if (userRole === ROLES.MANAGER) {
-      if (task.project.manager.toString() !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: "You are not authorized to access this task.",
-        });
-      }
-    }
-
-    // Developer Access
-    if (userRole === ROLES.DEVELOPER) {
-      if (task.assignedTo._id.toString() !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: "You are not authorized to access this task.",
-        });
-      }
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: task,
-    });
-  } catch (error) {
-    console.error("Get Task By Id Error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error.",
-    });
-  }
-};
-
 exports.updateTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -404,21 +288,266 @@ exports.getMyTasks = async (req, res) => {
   try {
     const developerId = req.user.id;
 
-    const tasks = await Task.find({
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      status,
+      priority,
+      sortBy = "createdAt",
+      order = "desc",
+    } = req.query;
+
+    // Build Filter
+    const filter = {
       assignedTo: developerId,
       isDeleted: false,
-    })
-      .populate("project", "name status priority deadline")
-      .populate("createdBy", "name email")
-      .sort({ createdAt: -1 });
+    };
+
+    // Search by Task Title
+    if (search) {
+      filter.title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // Filter by Status
+    if (status) {
+      filter.status = status;
+    }
+
+    // Filter by Priority
+    if (priority) {
+      filter.priority = priority;
+    }
+
+    // Allowed Sorting Fields
+    const allowedSortFields = [
+      "createdAt",
+      "updatedAt",
+      "dueDate",
+      "title",
+      "priority",
+      "status",
+    ];
+
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+
+    const sort = {
+      [sortField]: order === "asc" ? 1 : -1,
+    };
+
+    const currentPage = Math.max(parseInt(page), 1);
+    const perPage = Math.max(parseInt(limit), 1);
+
+    const skip = (currentPage - 1) * perPage;
+
+    // Execute Queries in Parallel
+    const [tasks, totalTasks] = await Promise.all([
+      Task.find(filter)
+        .populate("project", "name status priority deadline")
+        .populate("createdBy", "name email")
+        .sort(sort)
+        .skip(skip)
+        .limit(perPage)
+        .lean(),
+
+      Task.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.max(Math.ceil(totalTasks / perPage), 1);
 
     return res.status(200).json({
       success: true,
-      count: tasks.length,
+      message: "Tasks fetched successfully.",
       data: tasks,
+
+      pagination: {
+        currentPage,
+        perPage,
+        totalTasks,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPrevPage: currentPage > 1,
+      },
     });
   } catch (error) {
     console.error("Get My Tasks Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+exports.getProjectTasks = async (req, res) => {
+  try {
+    const managerId = req.user.id;
+    const { projectId } = req.params;
+
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      status,
+      priority,
+      sortBy = "createdAt",
+      order = "desc",
+    } = req.query;
+
+    // Check Project
+    const project = await Project.findOne({
+      _id: projectId,
+      manager: managerId,
+      isArchived: false,
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found.",
+      });
+    }
+
+    // Build Filter
+    const filter = {
+      project: projectId,
+      isDeleted: false,
+    };
+
+    // Search by Task Title
+    if (search) {
+      filter.title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // Filter by Status
+    if (status) {
+      filter.status = status;
+    }
+
+    // Filter by Priority
+    if (priority) {
+      filter.priority = priority;
+    }
+
+    // Allowed Sorting Fields
+    const allowedSortFields = [
+      "createdAt",
+      "updatedAt",
+      "dueDate",
+      "title",
+      "priority",
+      "status",
+    ];
+
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+
+    const sort = {
+      [sortField]: order === "asc" ? 1 : -1,
+    };
+
+    const currentPage = Math.max(parseInt(page), 1);
+    const perPage = Math.max(parseInt(limit), 1);
+
+    const skip = (currentPage - 1) * perPage;
+
+    // Fetch Tasks
+    const [tasks, totalTasks] = await Promise.all([
+      Task.find(filter)
+        .populate("assignedTo", "name email")
+        .populate("createdBy", "name email")
+        .sort(sort)
+        .skip(skip)
+        .limit(perPage)
+        .lean(),
+
+      Task.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.max(Math.ceil(totalTasks / perPage), 1);
+
+    return res.status(200).json({
+      success: true,
+      message: "Project tasks fetched successfully.",
+      data: tasks,
+
+      pagination: {
+        currentPage,
+        perPage,
+        totalTasks,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPrevPage: currentPage > 1,
+      },
+    });
+  } catch (error) {
+    console.error("Get Project Tasks Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+exports.getTaskById = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const { taskId } = req.params;
+
+    // Find Task
+    const task = await Task.findOne({
+      _id: taskId,
+      isDeleted: false,
+    })
+      .populate(
+        "project",
+        "name description status priority startDate deadline manager",
+      )
+      .populate("assignedTo", "name email")
+      .populate("createdBy", "name email")
+      .lean();
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found.",
+      });
+    }
+
+    // Manager Access
+    if (userRole === ROLES.MANAGER) {
+      if (task.project.manager.toString() !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this task.",
+        });
+      }
+    }
+
+    // Developer Access
+    if (userRole === ROLES.DEVELOPER) {
+      if (task.assignedTo._id.toString() !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this task.",
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Task fetched successfully.",
+      data: task,
+    });
+  } catch (error) {
+    console.error("Get Task By Id Error:", error);
 
     return res.status(500).json({
       success: false,

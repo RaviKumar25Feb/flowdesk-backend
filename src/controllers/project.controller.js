@@ -1,6 +1,8 @@
 const Project = require("../models/project.model");
 const User = require("../models/user.model");
 const { ROLES } = require("../constants/roles");
+const Task = require("../models/task.model");
+const { TASK_STATUS } = require("../constants/task.constants");
 
 exports.createProject = async (req, res) => {
   try {
@@ -70,18 +72,157 @@ exports.createProject = async (req, res) => {
 
 exports.getProjects = async (req, res) => {
   try {
-    const projects = await Project.find({
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      status,
+      priority,
+      sortBy = "createdAt",
+      order = "desc",
+    } = req.query;
+
+    // Build Filter
+    const filter = {
       manager: req.user.id,
       isArchived: false,
-    })
-      .populate("client", "name email")
-      .populate("manager", "name email")
-      .sort({ createdAt: -1 });
+    };
+
+    // Search
+    if (search) {
+      filter.name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // Status Filter
+    if (status) {
+      filter.status = status;
+    }
+
+    // Priority Filter
+    if (priority) {
+      filter.priority = priority;
+    }
+
+    // Sorting
+    const allowedSortFields = [
+      "createdAt",
+      "updatedAt",
+      "deadline",
+      "name",
+      "priority",
+      "status",
+    ];
+
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+
+    const sort = {
+      [sortField]: order === "asc" ? 1 : -1,
+    };
+
+    const currentPage = Math.max(parseInt(page), 1);
+    const perPage = Math.max(parseInt(limit), 1);
+
+    const skip = (currentPage - 1) * perPage;
+
+    // Fetch projects
+    const [projects, totalProjects] = await Promise.all([
+      Project.find(filter)
+        .select("name client developers status priority deadline createdAt")
+        .populate("client", "name")
+        .sort(sort)
+        .skip(skip)
+        .limit(perPage)
+        .lean(),
+
+      Project.countDocuments(filter),
+    ]);
+
+    // Get project ids
+    const projectIds = projects.map((project) => project._id);
+
+    // Task statistics
+    const taskStats = await Task.aggregate([
+      {
+        $match: {
+          project: { $in: projectIds },
+          isDeleted: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$project",
+          totalTasks: {
+            $sum: 1,
+          },
+          completedTasks: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: ["$status", TASK_STATUS.COMPLETED],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    // Convert aggregation into map
+    const taskMap = {};
+
+    taskStats.forEach((item) => {
+      taskMap[item._id.toString()] = item;
+    });
+
+    // Final Response
+    const formattedProjects = projects.map((project) => {
+      const stats = taskMap[project._id.toString()] || {
+        totalTasks: 0,
+        completedTasks: 0,
+      };
+
+      const progress =
+        stats.totalTasks > 0
+          ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
+          : 0;
+
+      return {
+        _id: project._id,
+        name: project.name,
+        client: project.client,
+        status: project.status,
+        priority: project.priority,
+        deadline: project.deadline,
+
+        developersCount: project.developers.length,
+
+        totalTasks: stats.totalTasks,
+        completedTasks: stats.completedTasks,
+
+        progress,
+      };
+    });
+
+    const totalPages = Math.max(Math.ceil(totalProjects / perPage), 1);
 
     return res.status(200).json({
       success: true,
-      count: projects.length,
-      data: projects,
+      message: "Projects fetched successfully.",
+      data: formattedProjects,
+
+      pagination: {
+        currentPage,
+        perPage,
+        totalProjects,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPrevPage: currentPage > 1,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -97,13 +238,16 @@ exports.getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Fetch Project
     const project = await Project.findOne({
       _id: id,
       manager: req.user.id,
       isArchived: false,
     })
       .populate("manager", "name email")
-      .populate("client", "name email");
+      .populate("client", "name email")
+      .populate("developers", "name email")
+      .lean();
 
     if (!project) {
       return res.status(404).json({
@@ -112,9 +256,91 @@ exports.getProjectById = async (req, res) => {
       });
     }
 
+    // Fetch Task Summary & Recent Tasks
+    const [taskStats, recentTasks] = await Promise.all([
+      Task.aggregate([
+        {
+          $match: {
+            project: project._id,
+            isDeleted: false,
+          },
+        },
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+
+      Task.find({
+        project: project._id,
+        isDeleted: false,
+      })
+        .sort({ updatedAt: -1 })
+        .limit(5)
+        .populate("assignedTo", "name")
+        .select("title assignedTo priority status dueDate updatedAt")
+        .lean(),
+    ]);
+
+    // Prepare Overview
+    const overview = {
+      developersCount: project.developers.length,
+
+      totalTasks: 0,
+
+      todoTasks: 0,
+
+      inProgressTasks: 0,
+
+      inReviewTasks: 0,
+
+      completedTasks: 0,
+
+      remainingTasks: 0,
+
+      progress: 0,
+    };
+
+    taskStats.forEach((item) => {
+      overview.totalTasks += item.count;
+
+      switch (item._id) {
+        case TASK_STATUS.TODO:
+          overview.todoTasks = item.count;
+          break;
+
+        case TASK_STATUS.IN_PROGRESS:
+          overview.inProgressTasks = item.count;
+          break;
+
+        case TASK_STATUS.IN_REVIEW:
+          overview.inReviewTasks = item.count;
+          break;
+
+        case TASK_STATUS.COMPLETED:
+          overview.completedTasks = item.count;
+          break;
+      }
+    });
+
+    overview.remainingTasks = overview.totalTasks - overview.completedTasks;
+
+    if (overview.totalTasks > 0) {
+      overview.progress = Math.round(
+        (overview.completedTasks / overview.totalTasks) * 100,
+      );
+    }
+
     return res.status(200).json({
       success: true,
-      data: project,
+      message: "Project details fetched successfully.",
+      data: {
+        project,
+        overview,
+        recentTasks,
+      },
     });
   } catch (error) {
     console.error(error);

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { TASK_STATUS, TASK_PRIORITY } = require("../constants/task.constants");
 
 const taskSchema = new mongoose.Schema(
   {
@@ -35,14 +36,14 @@ const taskSchema = new mongoose.Schema(
 
     priority: {
       type: String,
-      enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
-      default: "MEDIUM",
+      enum: Object.values(TASK_PRIORITY),
+      default: TASK_PRIORITY.MEDIUM,
     },
 
     status: {
       type: String,
-      enum: ["TODO", "IN_PROGRESS", "IN_REVIEW", "COMPLETED"],
-      default: "TODO",
+      enum: Object.values(TASK_STATUS),
+      default: TASK_STATUS.TODO,
     },
 
     startDate: Date,
