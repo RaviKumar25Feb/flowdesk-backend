@@ -10,6 +10,7 @@ const {
   updateTaskStatus,
   deleteTask,
   getMyTasks,
+  getTasks,
 } = require("../controllers/task.controller");
 
 const { auth } = require("../middlewares/auth.middleware");
@@ -33,7 +34,10 @@ router.post(
   createTask,
 );
 
-//get all task of a project
+//get all tasks for all project
+router.get("/", auth, authorize(ROLES.MANAGER), getTasks);
+
+//get all task for a project
 router.get(
   "/project/:projectId",
   auth,

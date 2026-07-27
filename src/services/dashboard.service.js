@@ -210,4 +210,5 @@ async function getManagerDashboard() {
 
 module.exports = {
   getManagerDashboard,
+  getTaskStatus
 };

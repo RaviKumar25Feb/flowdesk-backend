@@ -70,6 +70,7 @@ exports.createProject = async (req, res) => {
   }
 };
 
+//for projects table for manager
 exports.getProjects = async (req, res) => {
   try {
     const {
@@ -245,6 +246,7 @@ exports.getProjects = async (req, res) => {
   }
 };
 
+//for projects table for manager
 exports.getArchivedProjects = async (req, res) => {
   try {
     const {
@@ -405,6 +407,7 @@ exports.getArchivedProjects = async (req, res) => {
   }
 };
 
+//for manager
 exports.getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -523,6 +526,7 @@ exports.getProjectById = async (req, res) => {
   }
 };
 
+//for manager
 exports.updateProject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -583,6 +587,7 @@ exports.updateProject = async (req, res) => {
   }
 };
 
+//for manager
 exports.archiveProject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -618,6 +623,7 @@ exports.archiveProject = async (req, res) => {
   }
 };
 
+//for manager
 exports.restoreProject = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -646,6 +652,32 @@ exports.restoreProject = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+//for manager for getting all projects names for creating task
+exports.getProjectOptions = async (req, res) => {
+  try {
+    const projects = await Project.find({
+      manager: req.user.id,
+      isArchived: false,
+      status: { $ne: "CANCELLED" },
+    })
+      .select("_id name")
+      .sort({ name: 1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Project options fetched successfully.",
+      data: projects,
+    });
+  } catch (error) {
+    console.error("Get Project Options Error:", error);
 
     return res.status(500).json({
       success: false,

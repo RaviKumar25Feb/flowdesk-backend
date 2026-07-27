@@ -2,7 +2,9 @@ const Task = require("../models/task.model");
 const Project = require("../models/project.model");
 const User = require("../models/user.model");
 const { ROLES } = require("../constants/roles");
+const { getTaskStatus } = require("../services/dashboard.service");
 
+// for manager
 exports.createTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -95,6 +97,7 @@ exports.createTask = async (req, res) => {
   }
 };
 
+// for manager
 exports.updateTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -193,6 +196,7 @@ exports.updateTask = async (req, res) => {
   }
 };
 
+// for developer
 exports.updateTaskStatus = async (req, res) => {
   try {
     const developerId = req.user.id;
@@ -243,6 +247,7 @@ exports.updateTaskStatus = async (req, res) => {
   }
 };
 
+// for manager
 exports.deleteTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -284,6 +289,7 @@ exports.deleteTask = async (req, res) => {
   }
 };
 
+// for developer
 exports.getMyTasks = async (req, res) => {
   try {
     const developerId = req.user.id;
@@ -382,6 +388,7 @@ exports.getMyTasks = async (req, res) => {
   }
 };
 
+// for manager
 exports.getProjectTasks = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -495,6 +502,7 @@ exports.getProjectTasks = async (req, res) => {
   }
 };
 
+// for assigned developer
 exports.getTaskById = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -552,6 +560,120 @@ exports.getTaskById = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error.",
+    });
+  }
+};
+
+// for manager get all tasks
+exports.getTasks = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      project,
+      status,
+      priority,
+      sortBy = "createdAt",
+      order = "desc",
+    } = req.query;
+
+    const pageNumber = Math.max(Number(page), 1);
+    const pageLimit = Math.max(Number(limit), 1);
+    const skip = (pageNumber - 1) * pageLimit;
+
+    // Build Filter
+    const filter = {
+      isDeleted: false,
+    };
+
+    // Search
+    if (search.trim()) {
+      filter.$or = [
+        {
+          title: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          description: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    // Project Filter
+    if (project) {
+      filter.project = project;
+    }
+
+    // Status Filter
+    if (status) {
+      filter.status = status;
+    }
+
+    // Priority Filter
+    if (priority) {
+      filter.priority = priority;
+    }
+
+    const allowedSortFields = [
+      "createdAt",
+      "updatedAt",
+      "dueDate",
+      "priority",
+      "status",
+      "title",
+    ];
+
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+
+    const sort = {
+      [sortField]: order === "asc" ? 1 : -1,
+    };
+
+    const [tasks, totalTasks, overview] = await Promise.all([
+      Task.find(filter)
+        .select(
+          "title description project assignedTo priority status dueDate createdAt",
+        )
+        .sort(sort)
+        .skip(skip)
+        .limit(pageLimit)
+        .populate("project", "name")
+        .populate({
+          path: "assignedTo",
+          select: "name profile",
+          populate: {
+            path: "profile",
+            select: "avatar",
+          },
+        })
+        .populate("createdBy", "name"),
+
+      Task.countDocuments(filter),
+
+      getTaskStatus(),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      overview,
+      tasks,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages: Math.ceil(totalTasks / pageLimit),
+        totalTasks,
+        limit: pageLimit,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

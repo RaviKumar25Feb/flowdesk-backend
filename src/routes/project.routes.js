@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
+
 const { ROLES } = require("../constants/roles");
 
 const { auth } = require("../middlewares/auth.middleware");
 const { authorize } = require("../middlewares/role.middleware");
+const { validate } = require("../middlewares/validation.middleware");
 
 const {
   createProject,
@@ -12,7 +14,8 @@ const {
   updateProject,
   getArchivedProjects,
   archiveProject,
-  restoreProject
+  restoreProject,
+  getProjectOptions,
 } = require("../controllers/project.controller");
 
 const {
@@ -20,9 +23,7 @@ const {
   updateProjectValidation,
 } = require("../validations/project.validation");
 
-const { validate } = require("../middlewares/validation.middleware");
-
-// Create Project
+// Create project
 router.post(
   "/",
   auth,
@@ -32,15 +33,27 @@ router.post(
   createProject,
 );
 
-//get all projects for admin
+// Get all projects
 router.get("/", auth, authorize(ROLES.MANAGER), getProjects);
 
+// Get lightweight project options
+router.get("/options", auth, authorize(ROLES.MANAGER), getProjectOptions);
+
+// Get archived projects
 router.get("/archived", auth, authorize(ROLES.MANAGER), getArchivedProjects);
 
-//get single project details only manager
+// Restore project
+router.patch(
+  "/:projectId/restore",
+  auth,
+  authorize(ROLES.MANAGER),
+  restoreProject,
+);
+
+// Get single project
 router.get("/:id", auth, authorize(ROLES.MANAGER), getProjectById);
 
-//update project by manager
+// Update project
 router.put(
   "/:id",
   auth,
@@ -50,8 +63,7 @@ router.put(
   updateProject,
 );
 
-//delete project -> soft delete only archive
+// Archive project
 router.patch("/:id", auth, authorize(ROLES.MANAGER), archiveProject);
-router.patch("/:projectId/restore", auth, authorize(ROLES.MANAGER), restoreProject);
 
 module.exports = router;
