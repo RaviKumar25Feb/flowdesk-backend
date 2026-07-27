@@ -15,7 +15,12 @@ const projectDiscussionRoutes = require("./routes/projectDiscussion.routes");
 const dashboardRoutes = require("./routes/dashboard.routes.js");
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // React Frontend
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

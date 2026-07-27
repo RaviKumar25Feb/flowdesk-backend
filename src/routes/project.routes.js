@@ -10,7 +10,9 @@ const {
   getProjects,
   getProjectById,
   updateProject,
-  deleteProject,
+  getArchivedProjects,
+  archiveProject,
+  restoreProject
 } = require("../controllers/project.controller");
 
 const {
@@ -33,6 +35,8 @@ router.post(
 //get all projects for admin
 router.get("/", auth, authorize(ROLES.MANAGER), getProjects);
 
+router.get("/archived", auth, authorize(ROLES.MANAGER), getArchivedProjects);
+
 //get single project details only manager
 router.get("/:id", auth, authorize(ROLES.MANAGER), getProjectById);
 
@@ -47,6 +51,7 @@ router.put(
 );
 
 //delete project -> soft delete only archive
-router.delete("/:id", auth, authorize(ROLES.MANAGER), deleteProject);
+router.patch("/:id", auth, authorize(ROLES.MANAGER), archiveProject);
+router.patch("/:projectId/restore", auth, authorize(ROLES.MANAGER), restoreProject);
 
 module.exports = router;

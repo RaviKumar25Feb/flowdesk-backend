@@ -37,11 +37,7 @@ exports.assignDevelopers = async (req, res) => {
     const updatedProject = await Project.findByIdAndUpdate(
       projectId,
       {
-        $addToSet: {
-          developers: {
-            $each: developers,
-          },
-        },
+        developers,
       },
       {
         new: true,
@@ -87,67 +83,6 @@ exports.getAssignedDevelopers = async (req, res) => {
       success: true,
       count: project.developers.length,
       data: project.developers,
-    });
-  } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error.",
-    });
-  }
-};
-
-exports.removeDeveloper = async (req, res) => {
-  try {
-    const { projectId, developerId } = req.params;
-
-    // Check Project
-    const project = await Project.findOne({
-      _id: projectId,
-      manager: req.user.id,
-      isArchived: false,
-    });
-
-    if (!project) {
-      return res.status(404).json({
-        success: false,
-        message: "Project not found.",
-      });
-    }
-
-    // Check Developer Assigned
-    const isAssigned = project.developers.some(
-      (id) => id.toString() === developerId,
-    );
-
-    if (!isAssigned) {
-      return res.status(404).json({
-        success: false,
-        message: "Developer is not assigned to this project.",
-      });
-    }
-
-    // Remove Developer
-    const updatedProject = await Project.findByIdAndUpdate(
-      projectId,
-      {
-        $pull: {
-          developers: developerId,
-        },
-      },
-      {
-        new: true,
-      },
-    )
-      .populate("manager", "name email")
-      .populate("client", "name email")
-      .populate("developers", "name email");
-
-    return res.status(200).json({
-      success: true,
-      message: "Developer removed successfully.",
-      data: updatedProject,
     });
   } catch (error) {
     console.error(error);

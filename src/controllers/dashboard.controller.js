@@ -7,7 +7,7 @@ exports.getManagerDashboard = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Manager dashboard fetched successfully",
-      data: dashboard,
+      dashboard,
     });
   } catch (error) {
     console.error("Get Manager Dashboard Error:", error);

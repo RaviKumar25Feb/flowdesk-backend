@@ -13,7 +13,7 @@ const {
 } = require("../validations/profile.validation");
 
 //map routes with controllers
-router.get("/me", auth, getProfile);
+router.get("/", auth, getProfile);
 router.put("/update", auth, updateProfileValidation, validate, updateProfile);
 router.put("/avatar", auth, upload.single("avatar"), updateAvatar);
 

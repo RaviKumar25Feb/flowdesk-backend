@@ -11,19 +11,20 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     // Check User
-    const user = await User.findOne({ email }).populate("profile");
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        field: "email",
+        message: "Email not found.",
+      });
+    }
 
     if (!user.isActive) {
       return res.status(403).json({
         success: false,
         message: "Account is inactive",
-      });
-    }
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found.",
       });
     }
 
@@ -33,7 +34,8 @@ exports.login = async (req, res) => {
     if (!isPasswordMatched) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password.",
+        field: "password",
+        message: "Incorrect password.",
       });
     }
 
@@ -60,16 +62,12 @@ exports.login = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Login successful.",
-      token,
-      user,
+      message: "Login successfull",
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error.",
+      message: error.message,
     });
   }
 };

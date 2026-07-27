@@ -14,7 +14,6 @@ const {
 const {
   assignDevelopers,
   getAssignedDevelopers,
-  removeDeveloper,
 } = require("../controllers/team.controller");
 
 //assign developer to a project by manager
@@ -35,12 +34,5 @@ router.get(
   getAssignedDevelopers,
 );
 
-//delete developer from a project
-router.delete(
-  "/:projectId/developers/:developerId",
-  auth,
-  authorize(ROLES.MANAGER),
-  removeDeveloper,
-);
 
 module.exports = router;

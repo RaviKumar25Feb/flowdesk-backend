@@ -12,6 +12,8 @@ async function getOverview() {
     testingProjects,
     completedProjects,
     onHoldProjects,
+    cancelledProjects,
+    archivedProjects,
 
     totalTasks,
 
@@ -19,22 +21,37 @@ async function getOverview() {
     totalClients,
   ] = await Promise.all([
     // Projects
-    Project.countDocuments(),
+    Project.countDocuments({
+      isArchived: false,
+    }),
 
     Project.countDocuments({
+      isArchived: false,
       status: PROJECT_STATUS.IN_PROGRESS,
     }),
 
     Project.countDocuments({
+      isArchived: false,
       status: PROJECT_STATUS.TESTING,
     }),
 
     Project.countDocuments({
+      isArchived: false,
       status: PROJECT_STATUS.COMPLETED,
     }),
 
     Project.countDocuments({
+      isArchived: false,
       status: PROJECT_STATUS.ON_HOLD,
+    }),
+
+    Project.countDocuments({
+      isArchived: false,
+      status: PROJECT_STATUS.CANCELLED,
+    }),
+
+    Project.countDocuments({
+      isArchived: true,
     }),
 
     // Tasks
@@ -60,6 +77,8 @@ async function getOverview() {
     activeProjects: inProgressProjects + testingProjects,
     completedProjects,
     onHoldProjects,
+    cancelledProjects,
+    archivedProjects,
 
     totalTasks,
 
@@ -132,7 +151,14 @@ async function getRecentTasks() {
     .sort({ updatedAt: -1 })
     .limit(5)
     .populate("project", "name")
-    .populate("assignedTo", "name")
+    .populate({
+      path: "assignedTo",
+      select: "name profile",
+      populate: {
+        path: "profile",
+        select: "avatar",
+      },
+    })
     .select("title project assignedTo status priority dueDate updatedAt");
 
   return recentTasks;
