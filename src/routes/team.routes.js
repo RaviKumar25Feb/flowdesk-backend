@@ -34,5 +34,4 @@ router.get(
   getAssignedDevelopers,
 );
 
-
 module.exports = router;
