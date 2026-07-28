@@ -4,7 +4,7 @@ const User = require("../models/user.model");
 const { ROLES } = require("../constants/roles");
 const { getTaskStatus } = require("../services/dashboard.service");
 
-// for manager
+// for manager -> implement
 exports.createTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -97,7 +97,7 @@ exports.createTask = async (req, res) => {
   }
 };
 
-// for manager
+// for manager -> implement
 exports.updateTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -247,7 +247,7 @@ exports.updateTaskStatus = async (req, res) => {
   }
 };
 
-// for manager
+// for manager -> implement
 exports.deleteTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -502,7 +502,7 @@ exports.getProjectTasks = async (req, res) => {
   }
 };
 
-// for assigned developer
+// for assigned developer and manager
 exports.getTaskById = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -564,7 +564,7 @@ exports.getTaskById = async (req, res) => {
   }
 };
 
-// for manager get all tasks
+// for manager get all tasks ->implement
 exports.getTasks = async (req, res) => {
   try {
     const {
