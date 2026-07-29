@@ -3,6 +3,7 @@ const Project = require("../models/project.model");
 const User = require("../models/user.model");
 const { ROLES } = require("../constants/roles");
 const { getTaskStatus } = require("../services/dashboard.service");
+const mongoose = require("mongoose");
 
 // for manager -> implement
 exports.createTask = async (req, res) => {
@@ -502,68 +503,6 @@ exports.getProjectTasks = async (req, res) => {
   }
 };
 
-// for assigned developer and manager
-exports.getTaskById = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const userRole = req.user.role;
-    const { taskId } = req.params;
-
-    // Find Task
-    const task = await Task.findOne({
-      _id: taskId,
-      isDeleted: false,
-    })
-      .populate(
-        "project",
-        "name description status priority startDate deadline manager",
-      )
-      .populate("assignedTo", "name email")
-      .populate("createdBy", "name email")
-      .lean();
-
-    if (!task) {
-      return res.status(404).json({
-        success: false,
-        message: "Task not found.",
-      });
-    }
-
-    // Manager Access
-    if (userRole === ROLES.MANAGER) {
-      if (task.project.manager.toString() !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: "You are not authorized to access this task.",
-        });
-      }
-    }
-
-    // Developer Access
-    if (userRole === ROLES.DEVELOPER) {
-      if (task.assignedTo._id.toString() !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: "You are not authorized to access this task.",
-        });
-      }
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Task fetched successfully.",
-      data: task,
-    });
-  } catch (error) {
-    console.error("Get Task By Id Error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error.",
-    });
-  }
-};
-
 // for manager get all tasks ->implement
 exports.getTasks = async (req, res) => {
   try {
@@ -674,6 +613,150 @@ exports.getTasks = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// for assigned developer and manager
+exports.getTaskById = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const { taskId } = req.params;
+
+    // Validate Task ID
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid task ID.",
+      });
+    }
+
+    // Find Task
+    const task = await Task.findOne({
+      _id: taskId,
+      isDeleted: false,
+    })
+      .populate(
+        "project",
+        "name description status priority startDate deadline manager",
+      )
+      .populate({
+        path: "assignedTo",
+        select: "name email profile",
+        populate: {
+          path: "profile",
+          select: "avatar",
+        },
+      })
+      .populate("createdBy", "name email")
+      .lean();
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found.",
+      });
+    }
+
+    // Ensure associated project exists
+    if (!task.project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project associated with this task was not found.",
+      });
+    }
+
+    // Manager Access
+    if (userRole === ROLES.MANAGER) {
+      const projectManagerId = String(task.project.manager);
+
+      if (projectManagerId !== String(userId)) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this task.",
+        });
+      }
+    }
+
+    // Developer Access
+    else if (userRole === ROLES.DEVELOPER) {
+      const assignedDeveloperId = task.assignedTo?._id;
+
+      if (
+        !assignedDeveloperId ||
+        String(assignedDeveloperId) !== String(userId)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this task.",
+        });
+      }
+    }
+
+    // Block other roles
+    else {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this task.",
+      });
+    }
+
+    // Prepare clean frontend response
+    const taskResponse = {
+      _id: task._id,
+      title: task.title,
+      description: task.description,
+
+      project: {
+        _id: task.project._id,
+        name: task.project.name,
+        description: task.project.description,
+        status: task.project.status,
+        priority: task.project.priority,
+        startDate: task.project.startDate,
+        deadline: task.project.deadline,
+      },
+
+      assignedTo: task.assignedTo
+        ? {
+            _id: task.assignedTo._id,
+            name: task.assignedTo.name,
+            email: task.assignedTo.email,
+            avatar: task.assignedTo.profile?.avatar || null,
+          }
+        : null,
+
+      createdBy: task.createdBy
+        ? {
+            _id: task.createdBy._id,
+            name: task.createdBy.name,
+            email: task.createdBy.email,
+          }
+        : null,
+
+      priority: task.priority,
+      status: task.status,
+      startDate: task.startDate || null,
+      dueDate: task.dueDate,
+      estimatedHours: task.estimatedHours,
+      actualHours: task.actualHours,
+      completedAt: task.completedAt || null,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Task fetched successfully.",
+      data: taskResponse,
+    });
+  } catch (error) {
+    console.error("Get Task By ID Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
     });
   }
 };

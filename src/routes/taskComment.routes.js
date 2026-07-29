@@ -18,10 +18,17 @@ const {
 } = require("../controllers/taskComment.controller");
 
 //==================== MANAGER & DEVELOPER ====================
+// Get Task Comments
+router.get(
+  "/:taskId/comments",
+  auth,
+  authorize(ROLES.MANAGER, ROLES.DEVELOPER),
+  getTaskComments,
+);
 
 // Create Comment
 router.post(
-  "/tasks/:taskId/comments",
+  "/:taskId/comments",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
   createTaskCommentValidation,
@@ -29,17 +36,9 @@ router.post(
   createTaskComment,
 );
 
-// Get Task Comments
-router.get(
-  "/tasks/:taskId/comments",
-  auth,
-  authorize(ROLES.MANAGER, ROLES.DEVELOPER),
-  getTaskComments,
-);
-
 // Update Comment
 router.patch(
-  "/task-comments/:commentId",
+  "/:commentId",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
   updateTaskCommentValidation,
@@ -49,7 +48,7 @@ router.patch(
 
 // Delete Comment (Soft Delete)
 router.delete(
-  "/task-comments/:commentId",
+  "/:commentId",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
   deleteTaskComment,
