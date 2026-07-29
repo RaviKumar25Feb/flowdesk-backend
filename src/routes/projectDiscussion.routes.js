@@ -20,7 +20,7 @@ const {
 
 // Create Discussion
 router.post(
-  "/projects/:projectId/discussions",
+  "/:projectId/discussions",
   auth,
   authorize(ROLES.MANAGER, ROLES.CLIENT),
   createProjectDiscussionValidation,
@@ -30,7 +30,7 @@ router.post(
 
 // Get Discussions
 router.get(
-  "/projects/:projectId/discussions",
+  "/:projectId/discussions",
   auth,
   authorize(ROLES.MANAGER, ROLES.CLIENT),
   getProjectDiscussions,
@@ -38,7 +38,7 @@ router.get(
 
 // Update Discussion
 router.patch(
-  "/project-discussions/:discussionId",
+  "/:discussionId",
   auth,
   authorize(ROLES.MANAGER, ROLES.CLIENT),
   updateProjectDiscussionValidation,
@@ -48,7 +48,7 @@ router.patch(
 
 // Delete Discussion
 router.delete(
-  "/project-discussions/:discussionId",
+  "/:discussionId",
   auth,
   authorize(ROLES.MANAGER, ROLES.CLIENT),
   deleteProjectDiscussion,

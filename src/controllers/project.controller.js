@@ -419,8 +419,22 @@ exports.getProjectById = async (req, res) => {
       isArchived: false,
     })
       .populate("manager", "name email")
-      .populate("client", "name email")
-      .populate("developers", "name email")
+      .populate({
+        path: "client",
+        select: "name email profile",
+        populate: {
+          path: "profile",
+          select: "avatar",
+        },
+      })
+      .populate({
+        path: "developers",
+        select: "name email profile",
+        populate: {
+          path: "profile",
+          select: "avatar",
+        },
+      })
       .lean();
 
     if (!project) {
