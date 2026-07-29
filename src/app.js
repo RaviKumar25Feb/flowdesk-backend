@@ -17,7 +17,7 @@ const dashboardRoutes = require("./routes/dashboard.routes.js");
 // Middlewares
 app.use(
   cors({
-    origin: "http://localhost:5173", // React Frontend
+    origin: "https://flowdesk-manager-web.vercel.app", // React Frontend
     credentials: true,
   }),
 );
