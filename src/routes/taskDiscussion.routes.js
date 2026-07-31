@@ -20,7 +20,7 @@ const {
 //==================== MANAGER & DEVELOPER ====================
 // Get Task Discussions
 router.get(
-  "/:discussionId/discussions",
+  "/:taskId/discussions",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
   getTaskDiscussions,
@@ -28,7 +28,7 @@ router.get(
 
 // Create Discussion
 router.post(
-  "/:discussionId/discussions",
+  "/:taskId/discussions",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
   createTaskDiscussionValidation,

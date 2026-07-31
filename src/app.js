@@ -10,7 +10,7 @@ const projectRoutes = require("./routes/project.routes");
 const teamRoutes = require("./routes/team.routes");
 const taskRoutes = require("./routes/task.routes");
 const userRoutes = require("./routes/user.routes");
-const taskComment = require("./routes/taskDiscussion.routes.js");
+const taskDiscussion = require("./routes/taskDiscussion.routes.js");
 const projectDiscussionRoutes = require("./routes/projectDiscussion.routes");
 const dashboardRoutes = require("./routes/dashboard.routes.js");
 
@@ -35,7 +35,7 @@ app.use("/api/v1/projects", projectRoutes);
 app.use("/api/v1/team", teamRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/taskComment", taskComment);
+app.use("/api/v1/taskDiscussion", taskDiscussion);
 app.use("/api/v1/projectDiscussion", projectDiscussionRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 
