@@ -6,52 +6,52 @@ const { authorize } = require("../middlewares/role.middleware");
 const { validate } = require("../middlewares/validation.middleware");
 
 const {
-  createTaskCommentValidation,
-  updateTaskCommentValidation,
-} = require("../validations/taskComment.validation");
+  createTaskDiscussionValidation,
+  updateTaskDiscussionValidation,
+} = require("../validations/taskDiscussion.validation");
 
 const {
-  createTaskComment,
-  getTaskComments,
-  updateTaskComment,
-  deleteTaskComment,
-} = require("../controllers/taskComment.controller");
+  createTaskDiscussion,
+  getTaskDiscussions,
+  updateTaskDiscussion,
+  deleteTaskDiscussion,
+} = require("../controllers/taskDiscussion.controller");
 
 //==================== MANAGER & DEVELOPER ====================
-// Get Task Comments
+// Get Task Discussions
 router.get(
-  "/:taskId/comments",
+  "/:discussionId/discussions",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
-  getTaskComments,
+  getTaskDiscussions,
 );
 
-// Create Comment
+// Create Discussion
 router.post(
-  "/:taskId/comments",
+  "/:discussionId/discussions",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
-  createTaskCommentValidation,
+  createTaskDiscussionValidation,
   validate,
-  createTaskComment,
+  createTaskDiscussion,
 );
 
-// Update Comment
+// Update Discussion
 router.patch(
-  "/:commentId",
+  "/:discussionId",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
-  updateTaskCommentValidation,
+  updateTaskDiscussionValidation,
   validate,
-  updateTaskComment,
+  updateTaskDiscussion,
 );
 
-// Delete Comment (Soft Delete)
+// Delete Discussion (Soft Delete)
 router.delete(
-  "/:commentId",
+  "/:discussionId",
   auth,
   authorize(ROLES.MANAGER, ROLES.DEVELOPER),
-  deleteTaskComment,
+  deleteTaskDiscussion,
 );
 
 module.exports = router;

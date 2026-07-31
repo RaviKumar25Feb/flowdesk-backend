@@ -1,9 +1,10 @@
 const Task = require("../models/task.model");
 const Project = require("../models/project.model");
-const TaskComment = require("../models/taskComment.model");
+const TaskDiscussion = require("../models/taskDiscussion.model");
 const { ROLES } = require("../constants/roles");
 
-exports.createTaskComment = async (req, res) => {
+//create task discussion
+exports.createTaskDiscussion = async (req, res) => {
   try {
     const { taskId } = req.params;
     const { message } = req.body;
@@ -35,7 +36,7 @@ exports.createTaskComment = async (req, res) => {
       if (!project) {
         return res.status(403).json({
           success: false,
-          message: "You are not authorized to comment on this task.",
+          message: "You are not authorized to discuss on this task.",
         });
       }
     }
@@ -53,24 +54,24 @@ exports.createTaskComment = async (req, res) => {
       }
     }
 
-    // Create Comment
-    const comment = await TaskComment.create({
+    // Create Discussion
+    const discussion = await TaskDiscussion.create({
       task: task._id,
       user: req.user.id,
       message,
     });
 
-    const populatedComment = await TaskComment.findById(comment._id)
+    const populatedDiscussion = await TaskDiscussion.findById(discussion._id)
       .populate("user", "name email role")
       .populate("task", "title");
 
     return res.status(201).json({
       success: true,
-      message: "Comment added successfully.",
-      data: populatedComment,
+      message: "Discussion added successfully.",
+      data: populatedDiscussion,
     });
   } catch (error) {
-    console.error("Create Task Comment Error:", error);
+    console.error("Create Task Discussion Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -79,7 +80,8 @@ exports.createTaskComment = async (req, res) => {
   }
 };
 
-exports.getTaskComments = async (req, res) => {
+//get task discussion
+exports.getTaskDiscussions = async (req, res) => {
   try {
     const { taskId } = req.params;
 
@@ -110,7 +112,7 @@ exports.getTaskComments = async (req, res) => {
       if (!project) {
         return res.status(403).json({
           success: false,
-          message: "You are not authorized to view these comments.",
+          message: "You are not authorized to view these discussions.",
         });
       }
     }
@@ -123,13 +125,13 @@ exports.getTaskComments = async (req, res) => {
       if (task.assignedTo.toString() !== req.user.id) {
         return res.status(403).json({
           success: false,
-          message: "You are not authorized to view these comments.",
+          message: "You are not authorized to view these discussions.",
         });
       }
     }
 
-    // Get Comments
-    const comments = await TaskComment.find({
+    // Get Discussions
+    const discussions = await TaskDiscussion.find({
       task: taskId,
       isDeleted: false,
     })
@@ -138,11 +140,11 @@ exports.getTaskComments = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      count: comments.length,
-      data: comments,
+      count: discussions.length,
+      data: discussions,
     });
   } catch (error) {
-    console.error("Get Task Comments Error:", error);
+    console.error("Get Task Discussions Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -151,21 +153,22 @@ exports.getTaskComments = async (req, res) => {
   }
 };
 
-exports.updateTaskComment = async (req, res) => {
+//update task discussion
+exports.updateTaskDiscussion = async (req, res) => {
   try {
-    const { commentId } = req.params;
+    const { discussionId } = req.params;
     const { message } = req.body;
 
-    // Get Comment
-    const comment = await TaskComment.findOne({
-      _id: commentId,
+    // Get Discussions
+    const discussion = await TaskDiscussion.findOne({
+      _id: discussionId,
       isDeleted: false,
     });
 
-    if (!comment) {
+    if (!discussion) {
       return res.status(404).json({
         success: false,
-        message: "Comment not found.",
+        message: "Discussion not found.",
       });
     }
 
@@ -174,7 +177,7 @@ exports.updateTaskComment = async (req, res) => {
     //=====================
 
     if (req.user.role === ROLES.MANAGER) {
-      const task = await Task.findById(comment.task);
+      const task = await Task.findById(discussion.task);
 
       const project = await Project.findOne({
         _id: task.project,
@@ -185,7 +188,7 @@ exports.updateTaskComment = async (req, res) => {
       if (!project) {
         return res.status(403).json({
           success: false,
-          message: "You are not authorized to update this comment.",
+          message: "You are not authorized to update this discussion.",
         });
       }
     }
@@ -195,26 +198,26 @@ exports.updateTaskComment = async (req, res) => {
     //=====================
 
     if (req.user.role === ROLES.DEVELOPER) {
-      if (comment.user.toString() !== req.user.id) {
+      if (discussion.user.toString() !== req.user.id) {
         return res.status(403).json({
           success: false,
-          message: "You can update only your own comments.",
+          message: "You can update only your own discussions.",
         });
       }
     }
 
-    comment.message = message;
-    comment.isEdited = true;
+    discussion.message = message;
+    discussion.isEdited = true;
 
-    await comment.save();
+    await discussion.save();
 
     return res.status(200).json({
       success: true,
-      message: "Comment updated successfully.",
-      data: comment,
+      message: "Discussion updated successfully.",
+      data: discussion,
     });
   } catch (error) {
-    console.error("Update Task Comment Error:", error);
+    console.error("Update Task Discussion Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -223,20 +226,21 @@ exports.updateTaskComment = async (req, res) => {
   }
 };
 
-exports.deleteTaskComment = async (req, res) => {
+//delete task discussion
+exports.deleteTaskDiscussion = async (req, res) => {
   try {
-    const { commentId } = req.params;
+    const { discussionId } = req.params;
 
-    // Get Comment
-    const comment = await TaskComment.findOne({
-      _id: commentId,
+    // Get Discussions
+    const discussion = await TaskDiscussion.findOne({
+      _id: discussionId,
       isDeleted: false,
     });
 
-    if (!comment) {
+    if (!discussion) {
       return res.status(404).json({
         success: false,
-        message: "Comment not found.",
+        message: "Discussion not found.",
       });
     }
 
@@ -245,7 +249,7 @@ exports.deleteTaskComment = async (req, res) => {
     //======================
 
     if (req.user.role === ROLES.MANAGER) {
-      const task = await Task.findById(comment.task);
+      const task = await Task.findById(discussion.task);
 
       const project = await Project.findOne({
         _id: task.project,
@@ -256,7 +260,7 @@ exports.deleteTaskComment = async (req, res) => {
       if (!project) {
         return res.status(403).json({
           success: false,
-          message: "You are not authorized to delete this comment.",
+          message: "You are not authorized to delete this discussion.",
         });
       }
     }
@@ -266,24 +270,24 @@ exports.deleteTaskComment = async (req, res) => {
     //======================
 
     if (req.user.role === ROLES.DEVELOPER) {
-      if (comment.user.toString() !== req.user.id) {
+      if (discussion.user.toString() !== req.user.id) {
         return res.status(403).json({
           success: false,
-          message: "You can delete only your own comments.",
+          message: "You can delete only your own discussions.",
         });
       }
     }
 
-    comment.isDeleted = true;
+    discussion.isDeleted = true;
 
-    await comment.save();
+    await discussion.save();
 
     return res.status(200).json({
       success: true,
-      message: "Comment deleted successfully.",
+      message: "Discussion deleted successfully.",
     });
   } catch (error) {
-    console.error("Delete Task Comment Error:", error);
+    console.error("Delete Task Discussion Error:", error);
 
     return res.status(500).json({
       success: false,

@@ -152,6 +152,12 @@ exports.updateAvatar = async (req, res) => {
       });
     }
 
+    // Upload new image to Cloudinary
+    const uploadedImage = await uploadToCloudinary(
+      req.file.buffer,
+      "FlowDesk/Avatars",
+    );
+
     //agar old image hai to delete kardo phle
     if (profile.avatarPublicId) {
       try {
@@ -160,12 +166,6 @@ exports.updateAvatar = async (req, res) => {
         console.log("Failed to delete old avatar:", err.message);
       }
     }
-
-    // Upload new image to Cloudinary
-    const uploadedImage = await uploadToCloudinary(
-      req.file.buffer,
-      "FlowDesk/Avatars",
-    );
 
     // Save both publicImg id, and avatar url
     profile.avatar = uploadedImage.secure_url;

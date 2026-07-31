@@ -2,6 +2,7 @@ const Project = require("../models/project.model");
 const ProjectDiscussion = require("../models/projectDiscussion.model");
 const { ROLES } = require("../constants/roles");
 
+//create discussion
 exports.createProjectDiscussion = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -72,6 +73,7 @@ exports.createProjectDiscussion = async (req, res) => {
   }
 };
 
+//get discussion
 exports.getProjectDiscussions = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -140,6 +142,7 @@ exports.getProjectDiscussions = async (req, res) => {
   }
 };
 
+//update discussion
 exports.updateProjectDiscussion = async (req, res) => {
   try {
     const { discussionId } = req.params;
@@ -187,6 +190,7 @@ exports.updateProjectDiscussion = async (req, res) => {
   }
 };
 
+//delete discussion
 exports.deleteProjectDiscussion = async (req, res) => {
   try {
     const { discussionId } = req.params;

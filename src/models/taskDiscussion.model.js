@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const taskCommentSchema = new mongoose.Schema(
+const taskDiscussionSchema = new mongoose.Schema(
   {
     task: {
       type: mongoose.Schema.Types.ObjectId,
@@ -36,4 +36,4 @@ const taskCommentSchema = new mongoose.Schema(
   },
 );
 
-module.exports = mongoose.model("TaskComment", taskCommentSchema);
+module.exports = mongoose.model("TaskDiscussion", taskDiscussionSchema);
