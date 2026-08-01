@@ -3,7 +3,7 @@ const Profile = require("../models/profile.model");
 const { uploadToCloudinary } = require("../utils/uploadToCloudinary");
 const { cloudinary } = require("../config/cloudinary.config");
 
-//get user profile details
+//manager/developer/client get profile details
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate({
@@ -35,7 +35,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-//update user profile
+//manager/developer/client update their profile details
 exports.updateProfile = async (req, res) => {
   try {
     const {
@@ -122,7 +122,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-//update avatar
+//manager/developer/client update their avatar
 exports.updateAvatar = async (req, res) => {
   try {
     // Check file

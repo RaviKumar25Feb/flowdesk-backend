@@ -9,6 +9,7 @@ const { mailSender } = require("../utils/mailSender");
 const { accountCreatedTemplate } = require("../mails/accountCreated");
 const { accountDeactivatedTemplate } = require("../mails/accountDeactivated");
 
+//manager create user
 exports.createUser = async (req, res) => {
   try {
     const { name, email, role } = req.body;
@@ -78,6 +79,7 @@ exports.createUser = async (req, res) => {
   }
 };
 
+//manager update user
 exports.updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -138,7 +140,8 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-exports.deleteUser = async (req, res) => {
+//manager deactivate user
+exports.deactivateUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -182,7 +185,7 @@ exports.deleteUser = async (req, res) => {
       message: "User deactivated successfully.",
     });
   } catch (error) {
-    console.error("Delete User Error:", error);
+    console.error("Deactivate User Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -191,6 +194,57 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+//manager actiavte user
+exports.activateUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findOne({
+      _id: userId,
+      role: {
+        $in: [ROLES.DEVELOPER, ROLES.CLIENT],
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    if (user.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "User is already active.",
+      });
+    }
+
+    user.isActive = true;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User activated successfully.",
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+      },
+    });
+  } catch (error) {
+    console.error("Activate User Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+//manager get all users for users page
 exports.getAllUsers = async (req, res) => {
   try {
     const {
@@ -203,10 +257,12 @@ exports.getAllUsers = async (req, res) => {
       order = "desc",
     } = req.query;
 
+    // ============================
     // Build Filter
+    // ============================
+
     const filter = {};
 
-    // Role Filter
     if (role) {
       if (![ROLES.DEVELOPER, ROLES.CLIENT].includes(role)) {
         return res.status(400).json({
@@ -222,50 +278,77 @@ exports.getAllUsers = async (req, res) => {
       };
     }
 
-    // Search
-    if (search) {
+    // Search by name or email
+    if (search?.trim()) {
+      const searchText = search.trim();
+
       filter.$or = [
         {
           name: {
-            $regex: search,
+            $regex: searchText,
             $options: "i",
           },
         },
         {
           email: {
-            $regex: search,
+            $regex: searchText,
             $options: "i",
           },
         },
       ];
     }
 
-    // Active Filter
+    // Active / Inactive filter
     if (isActive !== undefined) {
+      if (!["true", "false"].includes(isActive)) {
+        return res.status(400).json({
+          success: false,
+          message: "isActive must be true or false.",
+        });
+      }
+
       filter.isActive = isActive === "true";
     }
 
+    // ============================
     // Sorting
+    // ============================
+
     const allowedSortFields = ["createdAt", "updatedAt", "name", "email"];
 
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
 
-    const sort = {
-      [sortField]: order === "asc" ? 1 : -1,
-    };
+    const sortOrder = order === "asc" ? 1 : -1;
 
+    // ============================
     // Pagination
-    const currentPage = Math.max(parseInt(page), 1);
-    const perPage = Math.max(parseInt(limit), 1);
+    // ============================
+
+    const currentPage = Math.max(Number.parseInt(page, 10) || 1, 1);
+
+    // Avoid accidentally fetching thousands of users
+    const perPage = Math.min(
+      Math.max(Number.parseInt(limit, 10) || 10, 1),
+      1000,
+    );
 
     const skip = (currentPage - 1) * perPage;
 
+    // ============================
     // Fetch Users
+    // ============================
+
     const [users, totalUsers] = await Promise.all([
       User.find(filter)
-        .select("-password -resetPasswordToken -resetPasswordExpires")
-        .populate("profile")
-        .sort(sort)
+        .select("_id name email role isActive profile createdAt updatedAt")
+        .populate({
+          path: "profile",
+          select:
+            "avatar phone designation department skills github linkedin portfolio",
+        })
+        .sort({
+          [sortField]: sortOrder,
+        })
         .skip(skip)
         .limit(perPage)
         .lean(),
@@ -273,17 +356,25 @@ exports.getAllUsers = async (req, res) => {
       User.countDocuments(filter),
     ]);
 
+    // ============================
     // Prepare Response
+    // ============================
+
     const data = await Promise.all(
       users.map(async (user) => {
         const projectsCount = await Project.countDocuments({
           isArchived: false,
+
           ...(user.role === ROLES.DEVELOPER
-            ? { developers: user._id }
-            : { client: user._id }),
+            ? {
+                developers: user._id,
+              }
+            : {
+                client: user._id,
+              }),
         });
 
-        // Client doesn't need task summary
+        // Client doesn't need task statistics
         if (user.role === ROLES.CLIENT) {
           return {
             ...user,
@@ -319,7 +410,6 @@ exports.getAllUsers = async (req, res) => {
       success: true,
       message: "Users fetched successfully.",
       data,
-
       pagination: {
         currentPage,
         perPage,
@@ -339,6 +429,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+//manager get user details for user detail page
 exports.getUserById = async (req, res) => {
   try {
     const { userId } = req.params;

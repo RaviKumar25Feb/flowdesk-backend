@@ -4,7 +4,7 @@ const { ROLES } = require("../constants/roles");
 const Task = require("../models/task.model");
 const { TASK_STATUS } = require("../constants/task.constants");
 
-//for manager create project
+//manager create project
 exports.createProject = async (req, res) => {
   try {
     // Get Data
@@ -71,7 +71,7 @@ exports.createProject = async (req, res) => {
   }
 };
 
-//for projects table for manager
+//manager get all projects for projects page
 exports.getProjects = async (req, res) => {
   try {
     const {
@@ -247,7 +247,7 @@ exports.getProjects = async (req, res) => {
   }
 };
 
-//for projects table for manager
+//manager get archived projects for projects page
 exports.getArchivedProjects = async (req, res) => {
   try {
     const {
@@ -408,7 +408,7 @@ exports.getArchivedProjects = async (req, res) => {
   }
 };
 
-//for manager
+//manager get project details for project details page
 exports.getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -541,7 +541,7 @@ exports.getProjectById = async (req, res) => {
   }
 };
 
-//for manager
+//manager update project
 exports.updateProject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -602,7 +602,7 @@ exports.updateProject = async (req, res) => {
   }
 };
 
-//for manager
+//manager archive a project
 exports.archiveProject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -638,7 +638,7 @@ exports.archiveProject = async (req, res) => {
   }
 };
 
-//for manager
+//manager restore a project
 exports.restoreProject = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -675,7 +675,7 @@ exports.restoreProject = async (req, res) => {
   }
 };
 
-//for manager for getting all projects names for creating task
+//manager getting all projects names for creating task to it
 exports.getProjectOptions = async (req, res) => {
   try {
     const projects = await Project.find({

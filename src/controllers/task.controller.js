@@ -5,7 +5,7 @@ const { ROLES } = require("../constants/roles");
 const { getTaskStatus } = require("../services/dashboard.service");
 const mongoose = require("mongoose");
 
-// for manager -> implement
+//manager create task
 exports.createTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -98,7 +98,7 @@ exports.createTask = async (req, res) => {
   }
 };
 
-// for manager -> implement
+//manager update task
 exports.updateTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -197,7 +197,7 @@ exports.updateTask = async (req, res) => {
   }
 };
 
-// for developer
+//developer update task status
 exports.updateTaskStatus = async (req, res) => {
   try {
     const developerId = req.user.id;
@@ -248,7 +248,7 @@ exports.updateTaskStatus = async (req, res) => {
   }
 };
 
-// for manager -> implement
+//manager delete task
 exports.deleteTask = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -290,7 +290,7 @@ exports.deleteTask = async (req, res) => {
   }
 };
 
-// for developer
+//developer get my tasks
 exports.getMyTasks = async (req, res) => {
   try {
     const developerId = req.user.id;
@@ -389,7 +389,7 @@ exports.getMyTasks = async (req, res) => {
   }
 };
 
-// for manager
+//manager get all tasks of a project
 exports.getProjectTasks = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -503,7 +503,7 @@ exports.getProjectTasks = async (req, res) => {
   }
 };
 
-// for manager get all tasks ->implement
+//manager get all tasks for tasks page
 exports.getTasks = async (req, res) => {
   try {
     const {
@@ -617,7 +617,7 @@ exports.getTasks = async (req, res) => {
   }
 };
 
-// for assigned developer and manager
+//manager/developer get task details
 exports.getTaskById = async (req, res) => {
   try {
     const userId = req.user.id;

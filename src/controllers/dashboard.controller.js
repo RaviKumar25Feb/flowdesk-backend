@@ -1,5 +1,6 @@
 const dashboardService = require("../services/dashboard.service");
 
+//manager get dashboard details for take overview
 exports.getManagerDashboard = async (req, res) => {
   try {
     const dashboard = await dashboardService.getManagerDashboard();

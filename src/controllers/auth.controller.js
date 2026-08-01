@@ -6,6 +6,7 @@ const { mailSender } = require("../utils/mailSender");
 const { passwordChanged } = require("../mails/passwordChanged");
 const { resetPasswordToken } = require("../mails/resetPasswordToken");
 
+//manager/developer/client login their account
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -75,6 +76,7 @@ exports.login = async (req, res) => {
   }
 };
 
+//manager/developer/client logout their account
 exports.logout = async (req, res) => {
   try {
     res.clearCookie("token");
@@ -93,6 +95,7 @@ exports.logout = async (req, res) => {
   }
 };
 
+//manager/developer/client can change their password
 exports.changePassword = async (req, res) => {
   try {
     //get user data from req.body
@@ -163,6 +166,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+//manager/developer/client generated token for reseting password
 exports.createToken = async (req, res) => {
   try {
     const { email } = req.body;
@@ -210,6 +214,7 @@ exports.createToken = async (req, res) => {
   }
 };
 
+//manager/developer/client reset their password
 exports.resetPassword = async (req, res) => {
   try {
     //get an email from req.body

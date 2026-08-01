@@ -8,7 +8,8 @@ const {
   getAllUsers,
   getUserById,
   updateUser,
-  deleteUser,
+  activateUser,
+  deactivateUser,
 } = require("../controllers/user.controller");
 
 const { auth } = require("../middlewares/auth.middleware");
@@ -40,7 +41,7 @@ router.get("/:userId", auth, authorize(ROLES.MANAGER), getUserById);
 
 //Update User
 router.patch(
-  "/:userId",
+  "/:userId/update",
   auth,
   authorize(ROLES.MANAGER),
   updateUserValidation,
@@ -48,7 +49,10 @@ router.patch(
   updateUser,
 );
 
-//Delete User
-router.delete("/:userId", auth, authorize(ROLES.MANAGER), deleteUser);
+//Deactivate User
+router.patch("/:userId/deactivate", auth, authorize(ROLES.MANAGER), deactivateUser);
+
+//Activate User
+router.patch("/:userId/activate", auth, authorize(ROLES.MANAGER), activateUser);
 
 module.exports = router;

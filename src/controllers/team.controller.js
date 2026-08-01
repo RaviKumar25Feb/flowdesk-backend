@@ -2,6 +2,7 @@ const Project = require("../models/project.model");
 const User = require("../models/user.model");
 const { ROLES } = require("../constants/roles");
 
+//manager assigned developer
 exports.assignDevelopers = async (req, res) => {
   try {
     const { projectId, developers } = req.body;
@@ -62,6 +63,7 @@ exports.assignDevelopers = async (req, res) => {
   }
 };
 
+//manager get all assigned developers
 exports.getAssignedDevelopers = async (req, res) => {
   try {
     const { projectId } = req.params;

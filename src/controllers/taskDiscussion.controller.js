@@ -3,7 +3,7 @@ const Project = require("../models/project.model");
 const TaskDiscussion = require("../models/taskDiscussion.model");
 const { ROLES } = require("../constants/roles");
 
-//create task discussion
+//manager/developer create task discussion
 exports.createTaskDiscussion = async (req, res) => {
   try {
     const { taskId } = req.params;
@@ -80,7 +80,7 @@ exports.createTaskDiscussion = async (req, res) => {
   }
 };
 
-//get task discussion
+//manager/developer get task discussion
 exports.getTaskDiscussions = async (req, res) => {
   try {
     const { taskId } = req.params;
@@ -153,7 +153,7 @@ exports.getTaskDiscussions = async (req, res) => {
   }
 };
 
-//update task discussion
+//manager/developer update task discussion
 exports.updateTaskDiscussion = async (req, res) => {
   try {
     const { discussionId } = req.params;
@@ -226,7 +226,7 @@ exports.updateTaskDiscussion = async (req, res) => {
   }
 };
 
-//delete task discussion
+//manager/developer delete task discussion
 exports.deleteTaskDiscussion = async (req, res) => {
   try {
     const { discussionId } = req.params;
