@@ -80,7 +80,12 @@ exports.login = async (req, res) => {
 //manager/developer/client logout their account
 exports.logout = async (req, res) => {
   try {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
 
     return res.status(200).json({
       success: true,
