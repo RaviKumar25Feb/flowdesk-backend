@@ -4,6 +4,7 @@ const Task = require("../models/task.model");
 const { TASK_STATUS } = require("../constants/task.constants");
 const User = require("../models/user.model");
 const Profile = require("../models/profile.model");
+const { PROJECT_STATUS } = require("../constants/project.constants");
 const { ROLES } = require("../constants/roles");
 const { mailSender } = require("../utils/mailSender");
 const { accountCreatedTemplate } = require("../mails/accountCreated");
@@ -541,12 +542,60 @@ exports.getUserById = async (req, res) => {
       client: user._id,
       isArchived: false,
     })
-      .select("name status priority startDate deadline developers")
+      .select(
+        "name status priority startDate deadline developers createdAt updatedAt",
+      )
+      .populate({
+        path: "developers",
+        select: "name email profile",
+        populate: {
+          path: "profile",
+          select: "avatar designation",
+        },
+      })
       .lean();
 
+    // Project statistics
     const overview = {
       projectsCount: projects.length,
+      activeProjects: 0,
+      completedProjects: 0,
+      onHoldProjects: 0,
+      planningProjects: 0,
+      testingProjects: 0,
+      cancelledProjects: 0,
     };
+
+    projects.forEach((project) => {
+      switch (project.status) {
+        case PROJECT_STATUS.PLANNING:
+          overview.planningProjects += 1;
+          break;
+
+        case PROJECT_STATUS.IN_PROGRESS:
+          overview.activeProjects += 1;
+          break;
+
+        case PROJECT_STATUS.TESTING:
+          overview.testingProjects += 1;
+          break;
+
+        case PROJECT_STATUS.ON_HOLD:
+          overview.onHoldProjects += 1;
+          break;
+
+        case PROJECT_STATUS.COMPLETED:
+          overview.completedProjects += 1;
+          break;
+
+        case PROJECT_STATUS.CANCELLED:
+          overview.cancelledProjects += 1;
+          break;
+
+        default:
+          break;
+      }
+    });
 
     return res.status(200).json({
       success: true,
@@ -559,6 +608,83 @@ exports.getUserById = async (req, res) => {
     });
   } catch (error) {
     console.error("Get User By ID Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+// Developer overview
+exports.getDevelopersOverview = async (req, res) => {
+  try {
+    const [totalDevelopers, activeDevelopers, inactiveDevelopers] =
+      await Promise.all([
+        User.countDocuments({
+          role: ROLES.DEVELOPER,
+        }),
+
+        User.countDocuments({
+          role: ROLES.DEVELOPER,
+          isActive: true,
+        }),
+
+        User.countDocuments({
+          role: ROLES.DEVELOPER,
+          isActive: false,
+        }),
+      ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Developers overview fetched successfully.",
+      data: {
+        totalDevelopers,
+        activeDevelopers,
+        inactiveDevelopers,
+      },
+    });
+  } catch (error) {
+    console.error("Get Developers Overview Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+// Client overview
+exports.getClientsOverview = async (req, res) => {
+  try {
+    const [totalClients, activeClients, inactiveClients] = await Promise.all([
+      User.countDocuments({
+        role: ROLES.CLIENT,
+      }),
+
+      User.countDocuments({
+        role: ROLES.CLIENT,
+        isActive: true,
+      }),
+
+      User.countDocuments({
+        role: ROLES.CLIENT,
+        isActive: false,
+      }),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Clients overview fetched successfully.",
+      data: {
+        totalClients,
+        activeClients,
+        inactiveClients,
+      },
+    });
+  } catch (error) {
+    console.error("Get Clients Overview Error:", error);
 
     return res.status(500).json({
       success: false,

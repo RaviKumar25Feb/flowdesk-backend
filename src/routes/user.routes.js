@@ -10,6 +10,8 @@ const {
   updateUser,
   activateUser,
   deactivateUser,
+  getDevelopersOverview,
+  getClientsOverview,
 } = require("../controllers/user.controller");
 
 const { auth } = require("../middlewares/auth.middleware");
@@ -36,6 +38,22 @@ router.post(
 //Get All Users
 router.get("/", auth, authorize(ROLES.MANAGER), getAllUsers);
 
+// Get developers overview
+router.get(
+  "/developers/overview",
+  auth,
+  authorize(ROLES.MANAGER),
+  getDevelopersOverview,
+);
+
+// Get clients overview
+router.get(
+  "/clients/overview",
+  auth,
+  authorize(ROLES.MANAGER),
+  getClientsOverview,
+);
+
 //Get User Details
 router.get("/:userId", auth, authorize(ROLES.MANAGER), getUserById);
 
@@ -50,7 +68,12 @@ router.patch(
 );
 
 //Deactivate User
-router.patch("/:userId/deactivate", auth, authorize(ROLES.MANAGER), deactivateUser);
+router.patch(
+  "/:userId/deactivate",
+  auth,
+  authorize(ROLES.MANAGER),
+  deactivateUser,
+);
 
 //Activate User
 router.patch("/:userId/activate", auth, authorize(ROLES.MANAGER), activateUser);
