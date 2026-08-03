@@ -15,6 +15,6 @@ const {
 //map routes with controllers
 router.get("/", auth, getProfile);
 router.put("/update", auth, updateProfileValidation, validate, updateProfile);
-router.put("/avatar", auth, upload.single("avatar"), updateAvatar);
+router.patch("/avatar", auth, upload.single("avatar"), updateAvatar);
 
 module.exports = router;

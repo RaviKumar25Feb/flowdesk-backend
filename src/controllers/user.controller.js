@@ -84,7 +84,6 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
-
     const { name, email, isActive } = req.body;
 
     // Check User
