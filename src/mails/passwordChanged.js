@@ -6,28 +6,29 @@ exports.passwordChanged = (name, email) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Password Changed</title>
+<title>Password Changed Successfully</title>
 </head>
 
-<body style="margin:0;padding:0;background:#f3f6fb;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 15px;background:#f3f6fb;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
 <tr>
 <td align="center">
 
-<table width="600" cellpadding="0" cellspacing="0"
-style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.08);">
+<table width="620" cellpadding="0" cellspacing="0"
+style="background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;">
 
 <!-- Header -->
 <tr>
-<td style="background:#2563eb;padding:30px;text-align:center;">
+<td align="center"
+style="background:#16a34a;padding:32px 24px;color:#ffffff;">
 
-<h1 style="margin:0;color:#ffffff;font-size:32px;">
-FlowDesk
+<h1 style="margin:0;font-size:28px;">
+Devolyt
 </h1>
 
-<p style="margin-top:8px;color:#dbeafe;font-size:15px;">
-Project Management System
+<p style="margin:10px 0 0;font-size:15px;opacity:.95;">
+Devolyt Technologies Pvt. Ltd.
 </p>
 
 </td>
@@ -35,15 +36,16 @@ Project Management System
 
 <!-- Success Icon -->
 <tr>
-<td align="center" style="padding-top:30px;">
+<td align="center" style="padding-top:35px;">
 
 <div style="
-width:70px;
-height:70px;
+width:72px;
+height:72px;
 border-radius:50%;
 background:#dcfce7;
-line-height:70px;
-font-size:36px;
+line-height:72px;
+font-size:34px;
+display:inline-block;
 ">
 ✅
 </div>
@@ -53,43 +55,47 @@ font-size:36px;
 
 <!-- Content -->
 <tr>
-<td style="padding:20px 45px 10px;">
+<td style="padding:30px 40px 10px;color:#374151;font-size:15px;line-height:1.8;">
 
-<h2 style="margin:0;color:#1f2937;">
-Hello ${name},
-</h2>
+<p style="margin-top:0;">
+Hello <strong>${name}</strong>,
+</p>
 
-<p style="margin-top:18px;color:#4b5563;font-size:16px;line-height:1.8;">
-Your FlowDesk account password has been changed successfully.
+<p>
+Your Devolyt account password has been changed successfully.
 This email confirms that your account credentials were updated.
+</p>
+
+<p>
+If this password change was made by you, no further action is required.
 </p>
 
 </td>
 </tr>
 
-<!-- Account Info -->
+<!-- Account Information -->
 <tr>
-<td style="padding:10px 45px;">
+<td style="padding:10px 40px;">
 
-<table width="100%" cellpadding="0" cellspacing="0"
-style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+<table width="100%" cellpadding="10" cellspacing="0"
+style="border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;">
 
 <tr>
-<td style="padding:14px 18px;background:#f9fafb;width:170px;font-weight:bold;color:#374151;">
-Account Email
+<td width="180">
+<strong>Account Email</strong>
 </td>
 
-<td style="padding:14px 18px;color:#111827;">
+<td>
 ${email}
 </td>
 </tr>
 
 <tr>
-<td style="padding:14px 18px;background:#f9fafb;font-weight:bold;color:#374151;">
-Changed On
+<td>
+<strong>Password Changed On</strong>
 </td>
 
-<td style="padding:14px 18px;color:#111827;">
+<td>
 ${new Date().toLocaleString()}
 </td>
 </tr>
@@ -99,25 +105,27 @@ ${new Date().toLocaleString()}
 </td>
 </tr>
 
-<!-- Notice -->
+<!-- Security Notice -->
 <tr>
-<td style="padding:25px 45px 10px;">
+<td style="padding:25px 40px 10px;">
 
-<div style="
+<div
+style="
 background:#eff6ff;
 border-left:4px solid #2563eb;
 padding:18px;
-border-radius:6px;
+border-radius:8px;
 color:#374151;
-font-size:15px;
-line-height:1.7;
+line-height:1.8;
 ">
 
-<strong>Security Notice</strong><br><br>
+<strong>Security Notice</strong>
 
-If you made this change, you can safely ignore this email.
-
-If you did <strong>not</strong> change your password, please reset it immediately and contact your administrator as soon as possible.
+<p style="margin:12px 0 0;">
+If you did <strong>not</strong> perform this action,
+please reset your password immediately and contact your
+manager or the IT team as soon as possible.
+</p>
 
 </div>
 
@@ -128,7 +136,8 @@ If you did <strong>not</strong> change your password, please reset it immediatel
 <tr>
 <td align="center" style="padding:35px;">
 
-<a href="http://localhost:5173/login"
+<a
+href="http://localhost:5173/login"
 style="
 background:#2563eb;
 color:#ffffff;
@@ -140,7 +149,7 @@ display:inline-block;
 font-size:15px;
 ">
 
-Login to FlowDesk
+Login to Devolyt
 
 </a>
 
@@ -149,22 +158,14 @@ Login to FlowDesk
 
 <!-- Footer -->
 <tr>
-<td style="
-background:#f9fafb;
-padding:30px;
-text-align:center;
-font-size:13px;
-color:#6b7280;
-line-height:1.8;
-">
+<td align="center"
+style="background:#f9fafb;padding:22px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:13px;line-height:1.8;">
 
-Thank you for using <strong>FlowDesk</strong>.<br>
-
-This is an automated email. Please do not reply.
-
+© ${new Date().getFullYear()} Devolyt Technologies Pvt. Ltd.
+<br>
+Devolyt • Internal Project Management System
 <br><br>
-
-© ${new Date().getFullYear()} FlowDesk. All Rights Reserved.
+This is an automated email. Please do not reply.
 
 </td>
 </tr>

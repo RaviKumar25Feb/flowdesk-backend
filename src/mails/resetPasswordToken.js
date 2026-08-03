@@ -1,110 +1,149 @@
 exports.resetPasswordToken = (name, token) => {
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Reset Password</title>
-
-    <style>
-
-        body{
-            background:#f4f4f4;
-            font-family:Arial,sans-serif;
-            margin:0;
-            padding:0;
-        }
-
-        .container{
-            width:100%;
-            max-width:600px;
-            margin:40px auto;
-            background:#ffffff;
-            border-radius:8px;
-            overflow:hidden;
-            box-shadow:0 2px 10px rgba(0,0,0,.1);
-        }
-
-        .header{
-            background:#2563eb;
-            color:white;
-            text-align:center;
-            padding:20px;
-            font-size:24px;
-            font-weight:bold;
-        }
-
-        .content{
-            padding:30px;
-            color:#333;
-        }
-
-        .token{
-            text-align:center;
-            font-size:34px;
-            font-weight:bold;
-            letter-spacing:8px;
-            color:#2563eb;
-            margin:25px 0;
-        }
-
-        .footer{
-            text-align:center;
-            padding:20px;
-            background:#f8f8f8;
-            color:#777;
-            font-size:13px;
-        }
-
-    </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reset Your Password</title>
 </head>
 
-<body>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
 
-<div class="container">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
+<tr>
+<td align="center">
 
-<div class="header">
-Reset Password
-</div>
+<table width="620" cellpadding="0" cellspacing="0"
+style="background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;">
 
-<div class="content">
+<!-- Header -->
+<tr>
+<td align="center"
+style="background:#2563eb;padding:32px 24px;color:#ffffff;">
 
-<h2>Hello ${name},</h2>
+<h1 style="margin:0;font-size:28px;">
+Devolyt
+</h1>
 
-<p>
-We received a request to reset your password.
+<p style="margin:10px 0 0;font-size:15px;opacity:.95;">
+Devolyt Technologies Pvt. Ltd.
+</p>
+
+</td>
+</tr>
+
+<!-- Content -->
+<tr>
+<td style="padding:35px 40px;color:#374151;font-size:15px;line-height:1.8;">
+
+<p style="margin-top:0;">
+Hello <strong>${name}</strong>,
 </p>
 
 <p>
-Use the verification code below to reset your password.
+We received a request to reset the password for your
+<strong>Devolyt</strong> account.
 </p>
 
-<div class="token">
+<p>
+Please use the verification code below to continue with your password reset.
+</p>
+
+<!-- Verification Code -->
+<div
+style="
+margin:30px 0;
+padding:20px;
+background:#eff6ff;
+border:1px solid #bfdbfe;
+border-radius:10px;
+text-align:center;
+">
+
+<p
+style="
+margin:0;
+font-size:13px;
+color:#6b7280;
+letter-spacing:1px;
+text-transform:uppercase;
+">
+Verification Code
+</p>
+
+<p
+style="
+margin:12px 0 0;
+font-size:36px;
+font-weight:bold;
+letter-spacing:8px;
+color:#2563eb;
+">
 ${token}
-</div>
-
-<p>
-This code is valid for <strong>10 minutes</strong>.
-</p>
-
-<p>
-If you didn't request a password reset, you can safely ignore this email.
-</p>
-
-<p>
-Thanks,<br>
-<b>FlowDesk Team</b>
 </p>
 
 </div>
 
-<div class="footer">
-© ${new Date().getFullYear()} FlowDesk. All rights reserved.
-</div>
+<p>
+This verification code will expire in
+<strong>10 minutes</strong>.
+</p>
+
+<div
+style="
+margin-top:25px;
+background:#fef3c7;
+border-left:4px solid #f59e0b;
+padding:18px;
+border-radius:8px;
+color:#92400e;
+line-height:1.8;
+">
+
+<strong>Security Notice</strong>
+
+<p style="margin:12px 0 0;">
+If you did not request a password reset,
+you can safely ignore this email.
+Your account will remain secure.
+</p>
 
 </div>
+
+<br>
+
+<p style="margin-bottom:0;">
+Regards,
+</p>
+
+<p style="margin-top:4px;font-weight:bold;color:#111827;">
+Devolyt Technologies Pvt. Ltd.
+</p>
+
+</td>
+</tr>
+
+<!-- Footer -->
+<tr>
+<td align="center"
+style="background:#f9fafb;padding:22px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:13px;line-height:1.8;">
+
+© ${new Date().getFullYear()} Devolyt Technologies Pvt. Ltd.
+<br>
+Devolyt • Internal Project Management System
+<br><br>
+This is an automated email. Please do not reply.
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
 
 </body>
 </html>

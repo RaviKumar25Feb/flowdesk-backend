@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const Profile = require("../models/profile.model");
+const crypto = require("crypto");
 const { mailSender } = require("../utils/mailSender");
 const { passwordChanged } = require("../mails/passwordChanged");
 const { resetPasswordToken } = require("../mails/resetPasswordToken");
@@ -182,7 +183,7 @@ exports.createToken = async (req, res) => {
     }
 
     //create random token
-    const newToken = await generateOTP();
+    const newToken = crypto.randomInt(100000, 1000000).toString();
 
     //save into the user document
     await User.findByIdAndUpdate(
